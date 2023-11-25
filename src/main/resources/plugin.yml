@@ -1,0 +1,8 @@
+name: MapleAdmin
+version: '${project.version}'
+main: com.lyttldev.mapleadmin.MapleAdmin
+api-version: '1.20'
+commands:
+  staff:
+    usage: /staff
+    description: MapleAdmin command
