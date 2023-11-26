@@ -1,6 +1,11 @@
 package com.lyttldev.mapleadmin.commands;
 
 import com.lyttldev.mapleadmin.MapleAdmin;
+import com.lyttldev.mapleadmin.utils.Console;
+import com.lyttldev.mapleadmin.utils.Message;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.node.Node;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.command.TabExecutor;
@@ -54,31 +59,54 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
         boolean staffActive = getStaffActive(player);
         if (!staffActive) {
             if (args.length < 1) {
-                sender.sendMessage("Please specify a staff mode reason.");
+                Message.sendPlayer(player, "Please specify a staff mode reason.", true);
                 return true;
             }
+            // join the args into a string
+            String reason = args.length > 0 ? String.join(" ", Arrays.copyOfRange(args, 0, args.length)) : "Task completed.";
             setStaffActive(player, true);
             setStaffLocation(player, player.getLocation());
-            appendStaffLog(player, args[0], true);
+            appendStaffLog(player, reason, true);
             // Save inventory
             saveInventory(playerInventory, player);
-            onStaffModeEnabled(player);
+            onStaffModeEnabled(player, reason);
         } else {
-            String reason = args.length > 0 ? args[0] : "Task completed.";
             setStaffActive(player, false);
             Location location = getStaffLocation(player);
             if (location == null) {
-                sender.sendMessage("No saved location found.");
+                Message.sendPlayer(player, "No saved location found.", true);
             } else {
                 player.teleport(location);
             }
+            // join the args into a string
+            String reason = args.length > 0 ? String.join(" ", Arrays.copyOfRange(args, 0, args.length)) : "Task completed.";
             appendStaffLog(player, reason, false);
             // Restore inventory
             restoreInventory(playerInventory, player);
-            onStaffModeDisabled(player);
+            onStaffModeDisabled(player, reason, false);
         }
 
         return true;
+    }
+
+    public static void onPlayerJoin(Player player) {
+        MapleAdminCommand mapleAdminCommand = new MapleAdminCommand(MapleAdmin.getPlugin(MapleAdmin.class));
+        boolean staffActive = mapleAdminCommand.getStaffActive(player);
+        if (staffActive) {
+            PlayerInventory playerInventory = player.getInventory();
+            mapleAdminCommand.setStaffActive(player, false);
+
+            Location location = mapleAdminCommand.getStaffLocation(player);
+            if (location == null) {
+                Message.sendPlayer(player, "No saved location found.", true);
+            } else {
+                player.teleport(location);
+            }
+
+            mapleAdminCommand.appendStaffLog(player, "Task completed.", false);
+            mapleAdminCommand.restoreInventory(playerInventory, player);
+            mapleAdminCommand.onStaffModeDisabled(player, "Task completed.", true);
+        }
     }
 
     public String getStaffActiveKey(Player player) {
@@ -209,7 +237,7 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
         String time = now.format(formatter);
 
         // Create new staff log entry
-        staffLog += time + splitKey + (enabled ? "Enabled" : "Disabled") + splitKey + player.getName() + splitKey + message + "\n";
+        staffLog += time + splitKey + enabled + splitKey + player.getName() + splitKey + message + "\n";
 
         // Save staff log
         config.set(staffLogKey, staffLog);
@@ -238,15 +266,16 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
 
 
         if (staffLogList.length == 0) {
-            player.sendMessage("No staff log found.");
+            Message.sendPlayer(player, "No staff log found.", true);
             return;
         }
 
         // Get page
+        int pageLength = 10;
         int pageInt = Integer.parseInt(page);
-        int pageStart = (pageInt - 1) * 10;
-        int pageEnd = pageInt * 10;
-        int pages = (int) Math.ceil((double) staffLogList.length / 10);
+        int pageStart = (pageInt - 1) * pageLength;
+        int pageEnd = pageInt * pageLength;
+        int pages = (int) Math.ceil((double) staffLogList.length / pageLength);
 
         if (pageInt > pages) {
             player.sendMessage("Page " + page + " does not exist.");
@@ -267,10 +296,17 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
             String staffLogPageItemPlayer = staffLogPageItemSplit[2];
             String staffLogPageItemMessage = staffLogPageItemSplit[3];
 
+            boolean enabled = Boolean.parseBoolean(staffLogPageItemEnabled);
+            if (enabled) {
+                staffLogPageItemEnabled = "&aEnabled";
+            } else {
+                staffLogPageItemEnabled = "&cDisabled";
+            }
+
             String line =
-                    "[" + staffLogPageItemTime + "] ("
-                    + staffLogPageItemEnabled + ") "
-                    + staffLogPageItemPlayer + ": "
+                    "&8[&7" + staffLogPageItemTime + "&8] ("
+                    + staffLogPageItemEnabled + "&8) &9"
+                    + staffLogPageItemPlayer + "&8: &7"
                     + staffLogPageItemMessage;
 
             // Prevent new line on the last item
@@ -282,11 +318,23 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
         }
         message += "\nPage " + page + "/" + pages;
 
-        player.sendMessage(message);
+        Message.sendPlayer(player, message, true);
     }
 
-    private void onStaffModeEnabled(Player player) {
-        player.sendMessage("Staff mode enabled!");
+    private void giveRole(Player player, String role) {
+        LuckPerms luckPerms = LuckPermsProvider.get();
+        Node node = Node.builder("group." + role).build();
+        luckPerms.getUserManager().modifyUser(player.getUniqueId(), user -> user.data().add(node));
+    }
+
+    private void removeRole(Player player, String role) {
+        LuckPerms luckPerms = LuckPermsProvider.get();
+        Node node = Node.builder("group." + role).build();
+        luckPerms.getUserManager().modifyUser(player.getUniqueId(), user -> user.data().remove(node));
+    }
+
+    private void onStaffModeEnabled(Player player, String reason) {
+        Message.sendChat(player.getName() + " &cenabled&7 staff mode.\n   Reason: &o&9" + reason, true);
 
         // Check user type
         if (player.hasPermission("mapleadmin.staff.admin")) {
@@ -298,14 +346,19 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
 
     private void onStaffModeEnabledAdmin(Player player) {
         player.setGameMode(GameMode.CREATIVE);
+        giveRole(player, "admin_active");
+        Console.run("op " + player.getName());
     }
 
     private void onStaffModeEnabledModerator(Player player) {
-        // player.setGameMode(GameMode.CREATIVE);
+        player.setGameMode(GameMode.CREATIVE);
+        giveRole(player, "mod_active");
     }
 
-    private void onStaffModeDisabled(Player player) {
-        player.sendMessage("Staff mode disabled!");
+    private void onStaffModeDisabled(Player player, String reason, boolean doNotAnnounce) {
+        if (!doNotAnnounce) {
+            Message.sendChat(player.getName() + " &adisabled&7 staff mode.\n   Reason: &9&o" + reason, true);
+        }
 
         // Check user type
         if (player.hasPermission("mapleadmin.staff.admin")) {
@@ -317,10 +370,13 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
 
     private void onStaffModeDisabledAdmin(Player player) {
         player.setGameMode(GameMode.SURVIVAL);
+        removeRole(player, "admin_active");
+        Console.run("deop " + player.getName());
     }
 
     private void onStaffModeDisabledModerator(Player player) {
-        // player.setGameMode(GameMode.SURVIVAL);
+        player.setGameMode(GameMode.SURVIVAL);
+        removeRole(player, "mod_active");
     }
 
     @Override
@@ -329,6 +385,6 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
             return Arrays.asList("log");
         }
 
-        return null;
+        return Arrays.asList();
     }
 }

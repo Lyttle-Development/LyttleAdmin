@@ -16,4 +16,8 @@ public class Console {
         ConsoleCommandSender console = Bukkit.getConsoleSender();
         Bukkit.getScheduler().callSyncMethod( plugin, () -> Bukkit.dispatchCommand( console, command ) );
     }
+
+    public static void log(String message) {
+        Bukkit.getLogger().info(message);
+    }
 }

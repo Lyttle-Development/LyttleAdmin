@@ -1,17 +1,44 @@
 package com.lyttldev.mapleadmin.utils;
 
+import com.lyttldev.mapleadmin.MapleAdmin;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+import javax.annotation.Nullable;
 
 public class Message {
-    public static void send(CommandSender sender, String message ) {
-        send(sender, message, "&a&lMapleAdmin&r &8- &7&o");
-    }
-    public static void sendBulk(CommandSender sender, String message ) {
-        send(sender, message, "&a&lMapleAdmin&r\n&7");
+    public static MapleAdmin plugin;
+
+    public static void init(MapleAdmin plugin) {
+        Message.plugin = plugin;
     }
 
-    public static void send(CommandSender sender, String message, String prefix) {
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', prefix + message + "&r"));
+    public static String getPrefix() {
+        return plugin.getConfig().getString("prefix");
+    }
+
+    public static void sendPlayer(Player player, String message, boolean prefix) {
+        if (prefix) {
+            player.sendMessage(getMessage(getPrefix() + message));
+            return;
+        }
+        player.sendMessage(getMessage(message));
+    }
+
+    public static void sendConsole(String message) {
+        Console.log(getMessage(message));
+    }
+
+    public static void sendChat(String message, boolean prefix) {
+        if (prefix) {
+            Bukkit.broadcastMessage(getMessage(getPrefix() + message));
+            return;
+        }
+        Bukkit.broadcastMessage(getMessage(message));
+    }
+
+    public static String getMessage(String message) {
+        return ChatColor.translateAlternateColorCodes('&', message + "&r");
     }
 }
