@@ -69,7 +69,7 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
             appendStaffLog(player, reason, true);
             // Save inventory
             saveInventory(playerInventory, player);
-            onStaffModeEnabled(player, reason);
+            onStaffModeEnabled(player, reason, 0);
         } else {
             setStaffActive(player, false);
             Location location = getStaffLocation(player);
@@ -83,7 +83,7 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
             appendStaffLog(player, reason, false);
             // Restore inventory
             restoreInventory(playerInventory, player);
-            onStaffModeDisabled(player, reason, false);
+            onStaffModeDisabled(player, reason, false, 0);
         }
 
         return true;
@@ -105,7 +105,7 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
 
             mapleAdminCommand.appendStaffLog(player, "Task completed.", false);
             mapleAdminCommand.restoreInventory(playerInventory, player);
-            mapleAdminCommand.onStaffModeDisabled(player, "Task completed.", true);
+            mapleAdminCommand.onStaffModeDisabled(player, "Task completed.", true, 0);
         }
     }
 
@@ -177,7 +177,7 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
             String serializedInventory = config.getString(getStaffInventoryKey(player));
 
             // Deserialize and restore inventory
-            deserializeAndRestore(playerInventory, player, serializedInventory);
+            deserializeAndRestore(playerInventory, player, serializedInventory, 0);
         } else {
             player.sendMessage("No saved inventory found.");
         }
@@ -197,24 +197,32 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
         return serialized.toString();
     }
 
-    private void deserializeAndRestore(PlayerInventory playerInventory, Player player, String serializedInventory) {
-        String[] serializedItems = serializedInventory.split(";");
-        ItemStack[] inventoryContents = new ItemStack[serializedItems.length];
+    private void deserializeAndRestore(PlayerInventory playerInventory, Player player, String serializedInventory, int tries) {
+        try {
+            String[] serializedItems = serializedInventory.split(";");
+            ItemStack[] inventoryContents = new ItemStack[serializedItems.length];
 
-        for (int i = 0; i < serializedItems.length; i++) {
-            String serializedItem = serializedItems[i];
-            if (!serializedItem.equals("null")) {
-                // Deserialize each item from Base64
-                byte[] serializedData = Base64.getDecoder().decode(serializedItem);
-                inventoryContents[i] = ItemStack.deserializeBytes(serializedData);
+            for (int i = 0; i < serializedItems.length; i++) {
+                String serializedItem = serializedItems[i];
+                if (!serializedItem.equals("null")) {
+                    // Deserialize each item from Base64
+                    byte[] serializedData = Base64.getDecoder().decode(serializedItem);
+                    inventoryContents[i] = ItemStack.deserializeBytes(serializedData);
+                }
             }
+
+            // Clear current inventory
+            playerInventory.clear();
+
+            // Restore inventory
+            playerInventory.setContents(inventoryContents);
+        } catch (Exception e) {
+            if (tries > 10) {
+                player.sendMessage("Failed to restore inventory.");
+                return;
+            }
+            deserializeAndRestore(playerInventory, player, serializedInventory, tries + 1);
         }
-
-        // Clear current inventory
-        playerInventory.clear();
-
-        // Restore inventory
-        playerInventory.setContents(inventoryContents);
     }
 
     private void appendStaffLog(Player player, String message, boolean enabled) {
@@ -333,7 +341,8 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
         luckPerms.getUserManager().modifyUser(player.getUniqueId(), user -> user.data().remove(node));
     }
 
-    private void onStaffModeEnabled(Player player, String reason) {
+    private void onStaffModeEnabled(Player player, String reason, int tries) {
+        try {
         Message.sendChat(player.getName() + " &cenabled&7 staff mode.\n   Reason: &o&9" + reason, true);
 
         // Check user type
@@ -341,6 +350,14 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
             onStaffModeEnabledAdmin(player);
         } else if (player.hasPermission("mapleadmin.staff.moderator")) {
             onStaffModeEnabledModerator(player);
+        }
+        } catch (Exception e) {
+            if (tries > 10) {
+                player.sendMessage("Failed to enable staff mode.");
+                return;
+            }
+
+            onStaffModeEnabled(player, reason, tries + 1);
         }
     }
 
@@ -355,16 +372,24 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
         giveRole(player, "mod_active");
     }
 
-    private void onStaffModeDisabled(Player player, String reason, boolean doNotAnnounce) {
-        if (!doNotAnnounce) {
-            Message.sendChat(player.getName() + " &adisabled&7 staff mode.\n   Reason: &9&o" + reason, true);
-        }
+    private void onStaffModeDisabled(Player player, String reason, boolean doNotAnnounce, int tries) {
+        try {
+            if (!doNotAnnounce) {
+                Message.sendChat(player.getName() + " &adisabled&7 staff mode.\n   Reason: &9&o" + reason, true);
+            }
 
-        // Check user type
-        if (player.hasPermission("mapleadmin.staff.admin")) {
-            onStaffModeDisabledAdmin(player);
-        } else if (player.hasPermission("mapleadmin.staff.moderator")) {
-            onStaffModeDisabledModerator(player);
+            // Check user type
+            if (player.hasPermission("mapleadmin.staff.admin")) {
+                onStaffModeDisabledAdmin(player);
+            } else if (player.hasPermission("mapleadmin.staff.moderator")) {
+                onStaffModeDisabledModerator(player);
+            }
+        } catch (Exception e) {
+            if (tries > 10) {
+                player.sendMessage("Failed to disable staff mode.");
+                return;
+            }
+            onStaffModeDisabled(player, reason, doNotAnnounce, tries + 1);
         }
     }
 
