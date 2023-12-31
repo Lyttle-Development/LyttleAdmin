@@ -1,9 +1,9 @@
-name: MapleAdmin
+name: LyttleAdmin
 version: '${project.version}'
-main: com.lyttldev.mapleadmin.MapleAdmin
+main: com.lyttldev.lyttleadmin.LyttleAdmin
 api-version: '1.20'
 depend: [LuckPerms]
 commands:
   staff:
     usage: /staff
-    description: MapleAdmin command
+    description: LyttleAdmin command

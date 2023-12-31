@@ -1,4 +1,4 @@
-package com.lyttldev.mapleadmin.utils;
+package com.lyttldev.lyttleadmin.utils;
 
 import org.bukkit.Bukkit;
 

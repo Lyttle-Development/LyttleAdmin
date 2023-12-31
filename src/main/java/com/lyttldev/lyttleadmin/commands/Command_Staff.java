@@ -1,8 +1,8 @@
-package com.lyttldev.mapleadmin.commands;
+package com.lyttldev.lyttleadmin.commands;
 
-import com.lyttldev.mapleadmin.MapleAdmin;
-import com.lyttldev.mapleadmin.utils.Console;
-import com.lyttldev.mapleadmin.utils.Message;
+import com.lyttldev.lyttleadmin.LyttleAdmin;
+import com.lyttldev.lyttleadmin.utils.Console;
+import com.lyttldev.lyttleadmin.utils.Message;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.node.Node;
@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
-public class MapleAdminCommand implements CommandExecutor, TabExecutor {
+public class Command_Staff implements CommandExecutor, TabExecutor {
     private final String staffKey = "staff";
     private final String staffActiveKey = "active";
     private final String staffInventoryKey = "inventory";
@@ -31,9 +31,9 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
     private final String splitKey = "__________";
 
     // define plugin
-    private final MapleAdmin plugin;
+    private final LyttleAdmin plugin;
 
-    public MapleAdminCommand(MapleAdmin plugin) {
+    public Command_Staff(LyttleAdmin plugin) {
         plugin.getCommand("staff").setExecutor(this);
         this.plugin = plugin;
     }
@@ -48,7 +48,7 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
         Player player = (Player) sender;
 
         // Check permissions
-        if (!sender.hasPermission("mapleadmin.staff") || (args.length > 0 && args[0].equals("log"))) {
+        if (!sender.hasPermission("lyttleadmin.staff") || (args.length > 0 && args[0].equals("log"))) {
             String page = args.length > 1 ? (args[1] != null ? args[1] : "1") : "1";
             getStaffLog(player, page);
             return true;
@@ -90,22 +90,22 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
     }
 
     public static void onPlayerJoin(Player player) {
-        MapleAdminCommand mapleAdminCommand = new MapleAdminCommand(MapleAdmin.getPlugin(MapleAdmin.class));
-        boolean staffActive = mapleAdminCommand.getStaffActive(player);
+        Command_Staff commandStaff = new Command_Staff(LyttleAdmin.getPlugin(LyttleAdmin.class));
+        boolean staffActive = commandStaff.getStaffActive(player);
         if (staffActive) {
             PlayerInventory playerInventory = player.getInventory();
-            mapleAdminCommand.setStaffActive(player, false);
+            commandStaff.setStaffActive(player, false);
 
-            Location location = mapleAdminCommand.getStaffLocation(player);
+            Location location = commandStaff.getStaffLocation(player);
             if (location == null) {
                 Message.sendPlayer(player, "No saved location found.", true);
             } else {
                 player.teleport(location);
             }
 
-            mapleAdminCommand.appendStaffLog(player, "Task completed.", false);
-            mapleAdminCommand.restoreInventory(playerInventory, player);
-            mapleAdminCommand.onStaffModeDisabled(player, "Task completed.", true, 0);
+            commandStaff.appendStaffLog(player, "Task completed.", false);
+            commandStaff.restoreInventory(playerInventory, player);
+            commandStaff.onStaffModeDisabled(player, "Task completed.", true, 0);
         }
     }
 
@@ -346,9 +346,9 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
         Message.sendChat(player.getName() + " &cenabled&7 staff mode.\n   Reason: &o&9" + reason, true);
 
         // Check user type
-        if (player.hasPermission("mapleadmin.staff.admin")) {
+        if (player.hasPermission("lyttleadmin.staff.admin")) {
             onStaffModeEnabledAdmin(player);
-        } else if (player.hasPermission("mapleadmin.staff.moderator")) {
+        } else if (player.hasPermission("lyttleadmin.staff.moderator")) {
             onStaffModeEnabledModerator(player);
         }
         } catch (Exception e) {
@@ -379,9 +379,9 @@ public class MapleAdminCommand implements CommandExecutor, TabExecutor {
             }
 
             // Check user type
-            if (player.hasPermission("mapleadmin.staff.admin")) {
+            if (player.hasPermission("lyttleadmin.staff.admin")) {
                 onStaffModeDisabledAdmin(player);
-            } else if (player.hasPermission("mapleadmin.staff.moderator")) {
+            } else if (player.hasPermission("lyttleadmin.staff.moderator")) {
                 onStaffModeDisabledModerator(player);
             }
         } catch (Exception e) {

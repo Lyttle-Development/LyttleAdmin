@@ -1,16 +1,14 @@
-package com.lyttldev.mapleadmin.utils;
+package com.lyttldev.lyttleadmin.utils;
 
-import com.lyttldev.mapleadmin.MapleAdmin;
+import com.lyttldev.lyttleadmin.LyttleAdmin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import javax.annotation.Nullable;
-
 public class Message {
-    public static MapleAdmin plugin;
+    public static LyttleAdmin plugin;
 
-    public static void init(MapleAdmin plugin) {
+    public static void init(LyttleAdmin plugin) {
         Message.plugin = plugin;
     }
 
