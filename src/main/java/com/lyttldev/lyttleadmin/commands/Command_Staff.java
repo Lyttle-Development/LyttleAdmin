@@ -1,41 +1,40 @@
 package com.lyttldev.lyttleadmin.commands;
 
 import com.lyttldev.lyttleadmin.LyttleAdmin;
+import com.lyttldev.lyttleadmin.database.Inventory;
+import com.lyttldev.lyttleadmin.database.Log;
+import com.lyttldev.lyttleadmin.database.SQLite;
 import com.lyttldev.lyttleadmin.utils.Console;
+import com.lyttldev.lyttleadmin.utils.LocationUtil;
 import com.lyttldev.lyttleadmin.utils.Message;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.node.Node;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.command.TabExecutor;
-import org.bukkit.entity.Player;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.command.TabExecutor;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
 public class Command_Staff implements CommandExecutor, TabExecutor {
-    private final String staffKey = "staff";
-    private final String staffActiveKey = "active";
-    private final String staffInventoryKey = "inventory";
-    private final String staffLocationKey = "location";
-    private final String splitKey = "__________";
-
     // define plugin
     private final LyttleAdmin plugin;
+    private final SQLite sqlite;
 
     public Command_Staff(LyttleAdmin plugin) {
         plugin.getCommand("staff").setExecutor(this);
         this.plugin = plugin;
+        this.sqlite = plugin.sqlite;
     }
 
     @Override
@@ -64,14 +63,11 @@ public class Command_Staff implements CommandExecutor, TabExecutor {
             }
             // join the args into a string
             String reason = args.length > 0 ? String.join(" ", Arrays.copyOfRange(args, 0, args.length)) : "Task completed.";
-            setStaffActive(player, true);
-            setStaffLocation(player, player.getLocation());
             appendStaffLog(player, reason, true);
             // Save inventory
             saveInventory(playerInventory, player);
             onStaffModeEnabled(player, reason, 0);
         } else {
-            setStaffActive(player, false);
             Location location = getStaffLocation(player);
             if (location == null) {
                 Message.sendPlayer(player, "No saved location found.", true);
@@ -94,7 +90,6 @@ public class Command_Staff implements CommandExecutor, TabExecutor {
         boolean staffActive = commandStaff.getStaffActive(player);
         if (staffActive) {
             PlayerInventory playerInventory = player.getInventory();
-            commandStaff.setStaffActive(player, false);
 
             Location location = commandStaff.getStaffLocation(player);
             if (location == null) {
@@ -109,75 +104,51 @@ public class Command_Staff implements CommandExecutor, TabExecutor {
         }
     }
 
-    public String getStaffActiveKey(Player player) {
-        return staffKey + "." + player.getName() + "." + staffActiveKey;
-    }
-
-    public String getStaffInventoryKey(Player player) {
-        return staffKey + "." + player.getName() + "." + staffInventoryKey;
-    }
-
-    public String getStaffLocationKey(Player player) {
-        return staffKey + "." + player.getName() + "." + staffLocationKey;
-    }
-
     private boolean getStaffActive(Player player) {
-        FileConfiguration config = this.plugin.getConfig();
+        Inventory inventory = sqlite.getInventory(player.getUniqueId().toString());
 
-        if (config.contains(getStaffActiveKey(player))) {
-            return config.getBoolean(getStaffActiveKey(player));
+        if (inventory != null) {
+            Bukkit.broadcastMessage("Inventory found: " + inventory.getEnabled());
+            return inventory.getEnabled();
         } else {
             return false;
         }
     }
 
-    private void setStaffActive(Player player, boolean active) {
-        FileConfiguration config = this.plugin.getConfig();
-
-        config.set(getStaffActiveKey(player), active);
-        this.plugin.saveConfig();
-    }
-
-    private void setStaffLocation(Player player, Location location) {
-        FileConfiguration config = this.plugin.getConfig();
-
-        config.set(getStaffLocationKey(player), location);
-
-        this.plugin.saveConfig();
-    }
-
     private Location getStaffLocation(Player player) {
-        FileConfiguration config = this.plugin.getConfig();
+        Inventory inventory = sqlite.getInventory(player.getUniqueId().toString());
 
-        if (config.contains(getStaffLocationKey(player))) {
-            return (Location) config.get(getStaffLocationKey(player));
+        if (inventory != null) {
+            String locationString = inventory.getLocation();
+            return LocationUtil.stringToLocation(locationString);
         } else {
             return null;
         }
     }
 
     private void saveInventory(PlayerInventory playerInventory, Player player) {
-        FileConfiguration config = this.plugin.getConfig();
-
         // Serialize inventory to Base64
         String serializedInventory = serializeInventory(playerInventory);
 
         // Save to config
-        config.set(getStaffInventoryKey(player), serializedInventory);
-        this.plugin.saveConfig();
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        Inventory inventory = new Inventory(0, player.getUniqueId().toString(), player.getName(), LocationUtil.locationToString(player.getLocation()), true, timestamp, serializedInventory);
+        sqlite.insertInventory(inventory);
 
         playerInventory.clear();
     }
 
     private void restoreInventory(PlayerInventory playerInventory, Player player) {
-        FileConfiguration config = this.plugin.getConfig();
+        Inventory inventory = sqlite.getInventory(player.getUniqueId().toString());
 
-        if (config.contains(getStaffInventoryKey(player))) {
+        if (inventory != null) {
             // Read from config
-            String serializedInventory = config.getString(getStaffInventoryKey(player));
+            String serializedInventory = inventory.getInventoryContents();
 
             // Deserialize and restore inventory
             deserializeAndRestore(playerInventory, player, serializedInventory, 0);
+            inventory.setEnabled(false);
+            sqlite.updateInventory(inventory);
         } else {
             player.sendMessage("No saved inventory found.");
         }
@@ -226,107 +197,30 @@ public class Command_Staff implements CommandExecutor, TabExecutor {
     }
 
     private void appendStaffLog(Player player, String message, boolean enabled) {
-        FileConfiguration config = this.plugin.getConfig();
-
-        String staffLogKey = "staff_log";
-        String staffLog = config.getString(staffLogKey);
-
-        if (staffLog == null) {
-            staffLog = "";
-        }
-
-        // Get current time: "DD/MM/YYYY HH:MM:SS" in the format of a string
-        LocalDateTime now = LocalDateTime.now();
-
-        // Define the desired date-time format
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-
-        // Format the current date and time using the specified format
-        String time = now.format(formatter);
-
-        // Create new staff log entry
-        staffLog += time + splitKey + enabled + splitKey + player.getName() + splitKey + message + "\n";
-
-        // Save staff log
-        config.set(staffLogKey, staffLog);
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        Log log = new Log(0, player.getUniqueId().toString(), player.getName(), timestamp, enabled, message);
+        sqlite.insertLog(log);
     }
-    
+
     private void getStaffLog(Player player, String page) {
-        FileConfiguration config = this.plugin.getConfig();
+        List<Log> logs = sqlite.getLogs(10, Integer.parseInt(page) - 1);
 
-        String staffLogKey = "staff_log";
-        String staffLog = config.getString(staffLogKey);
-
-        if (staffLog == null) {
-            staffLog = "";
+        // Join logs in string
+        StringBuilder logString = new StringBuilder();
+        for (Log log : logs) {
+            logString
+                    .append("\n")
+                    .append("&8[&7")
+                    .append(log.getDateCreated())
+                    .append("&8] (")
+                    .append(log.getEnabled() ? "&aEnabled" : "&cDisabled")
+                    .append("&8) &9")
+                    .append(log.getUsername())
+                    .append("&8: &7")
+                    .append(log.getMessage());
         }
 
-        // Define list of strings
-        String[] staffLogList = staffLog.split("\n");
-
-        // reverse list
-        staffLogList = Arrays.stream(staffLogList).toArray(String[]::new);
-        for (int i = 0; i < staffLogList.length / 2; i++) {
-            String temp = staffLogList[i];
-            staffLogList[i] = staffLogList[staffLogList.length - i - 1];
-            staffLogList[staffLogList.length - i - 1] = temp;
-        }
-
-
-        if (staffLogList.length == 0) {
-            Message.sendPlayer(player, "No staff log found.", true);
-            return;
-        }
-
-        // Get page
-        int pageLength = 10;
-        int pageInt = Integer.parseInt(page);
-        int pageStart = (pageInt - 1) * pageLength;
-        int pageEnd = pageInt * pageLength;
-        int pages = (int) Math.ceil((double) staffLogList.length / pageLength);
-
-        if (pageInt > pages) {
-            player.sendMessage("Page " + page + " does not exist.");
-            return;
-        }
-
-        // Get page of staff log
-        String[] staffLogPage = Arrays.copyOfRange(staffLogList, pageStart, pageEnd);
-        // remove null and empty strings
-        staffLogPage = Arrays.stream(staffLogPage).filter(s -> (s != null && s.length() > 0)).toArray(String[]::new);
-
-        // Send page of staff log to player
-        String message = "Out Staff did the following:\n";
-        for (String staffLogPageItem : staffLogPage) {
-            String[] staffLogPageItemSplit = staffLogPageItem.split(splitKey);
-            String staffLogPageItemTime = staffLogPageItemSplit[0];
-            String staffLogPageItemEnabled = staffLogPageItemSplit[1];
-            String staffLogPageItemPlayer = staffLogPageItemSplit[2];
-            String staffLogPageItemMessage = staffLogPageItemSplit[3];
-
-            boolean enabled = Boolean.parseBoolean(staffLogPageItemEnabled);
-            if (enabled) {
-                staffLogPageItemEnabled = "&aEnabled";
-            } else {
-                staffLogPageItemEnabled = "&cDisabled";
-            }
-
-            String line =
-                    "&8[&7" + staffLogPageItemTime + "&8] ("
-                    + staffLogPageItemEnabled + "&8) &9"
-                    + staffLogPageItemPlayer + "&8: &7"
-                    + staffLogPageItemMessage;
-
-            // Prevent new line on the last item
-            if (staffLogPageItem == staffLogPage[staffLogPage.length - 1]) {
-                message += line;
-            } else {
-                message += line + "\n";
-            }
-        }
-        message += "\nPage " + page + "/" + pages;
-
-        Message.sendPlayer(player, message, true);
+        Message.sendPlayer(player, logString.toString(), true);
     }
 
     private void giveRole(Player player, String role) {
@@ -343,14 +237,14 @@ public class Command_Staff implements CommandExecutor, TabExecutor {
 
     private void onStaffModeEnabled(Player player, String reason, int tries) {
         try {
-        Message.sendChat(player.getName() + " &cenabled&7 staff mode.\n   Reason: &o&9" + reason, true);
+            Message.sendChat(player.getName() + " &cenabled&7 staff mode.\n   Reason: &o&9" + reason, true);
 
-        // Check user type
-        if (player.hasPermission("lyttleadmin.staff.admin")) {
-            onStaffModeEnabledAdmin(player);
-        } else if (player.hasPermission("lyttleadmin.staff.moderator")) {
-            onStaffModeEnabledModerator(player);
-        }
+            // Check user type
+            if (player.hasPermission("lyttleadmin.staff.admin")) {
+                onStaffModeEnabledAdmin(player);
+            } else if (player.hasPermission("lyttleadmin.staff.moderator")) {
+                onStaffModeEnabledModerator(player);
+            }
         } catch (Exception e) {
             if (tries > 10) {
                 player.sendMessage("Failed to enable staff mode.");
