@@ -139,6 +139,33 @@ public class SQLite {
         return inventory;
     }
 
+    public Inventory getInventory(String uuid, Timestamp dateCreated) {
+        // SQL query to select the newest Inventory record for the given UUID and dateCreated based on YYYY-MM-DD HH:MM:SS not including milliseconds
+        String query = "SELECT * FROM inventories WHERE uuid = ? AND dateCreated = ?";
+        Inventory inventory = null;
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, uuid);
+            statement.setTimestamp(2, dateCreated);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    int id = resultSet.getInt("id");
+                    String username = resultSet.getString("username");
+                    String location = resultSet.getString("location");
+                    Boolean enabled = resultSet.getBoolean("enabled");
+                    String inventoryContents = resultSet.getString("inventoryContents");
+
+                    inventory = new Inventory(id, uuid, username, location, enabled, dateCreated, inventoryContents);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return inventory;
+    }
+
     public Inventory insertInventory(Inventory inventory) {
         String query = "INSERT INTO inventories (uuid, username, location, enabled, dateCreated, inventoryContents) VALUES (?, ?, ?, ?, ?, ?)";
 
@@ -243,7 +270,8 @@ public class SQLite {
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, pageSize);
-            statement.setInt(2, page * pageSize);
+            int actualPageSize = page > 0 ? page * pageSize : 0;
+            statement.setInt(2, actualPageSize);
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {

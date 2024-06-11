@@ -10,7 +10,6 @@ import com.lyttldev.lyttleadmin.utils.Message;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.node.Node;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -48,9 +47,33 @@ public class Command_Staff implements CommandExecutor, TabExecutor {
 
         // Check permissions
         if (!sender.hasPermission("lyttleadmin.staff") || (args.length > 0 && args[0].equals("log"))) {
+            if (args.length > 0 && args[0].equals("--restore")) {
+                sender.sendMessage("You do not have permission to view staff logs.");
+                return true;
+            }
             String page = args.length > 1 ? (args[1] != null ? args[1] : "1") : "1";
             getStaffLog(player, page);
             return true;
+        }
+
+        // Check if the args is --restore
+        if (args.length > 0 && args[0].equals("--restore")) {
+            if (args.length < 3) {
+                sender.sendMessage("Insufficient arguments. Usage: /staff --restore <date> <time>");
+                return true;
+            }
+            try {
+                // Converts 2024-01-01 00:00:00 to a timestamp, found in args[1] and args[2]
+                String dateTimeString = args[1] + " " + args[2];
+                Timestamp timestamp = Timestamp.valueOf(dateTimeString);
+                timestamp.setNanos(0);
+                PlayerInventory playerInventory = player.getInventory();
+                restoreLostInventory(playerInventory, player, timestamp);
+                return true;
+            } catch (Exception e) {
+                sender.sendMessage("Invalid date or time format. Usage: /staff --restore <date> <time>");
+                return true;
+            }
         }
 
         PlayerInventory playerInventory = player.getInventory();
@@ -108,7 +131,6 @@ public class Command_Staff implements CommandExecutor, TabExecutor {
         Inventory inventory = sqlite.getInventory(player.getUniqueId().toString());
 
         if (inventory != null) {
-            Bukkit.broadcastMessage("Inventory found: " + inventory.getEnabled());
             return inventory.getEnabled();
         } else {
             return false;
@@ -130,9 +152,10 @@ public class Command_Staff implements CommandExecutor, TabExecutor {
         // Serialize inventory to Base64
         String serializedInventory = serializeInventory(playerInventory);
 
-        // Save to config
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        Inventory inventory = new Inventory(0, player.getUniqueId().toString(), player.getName(), LocationUtil.locationToString(player.getLocation()), true, timestamp, serializedInventory);
+        Timestamp datetime = new Timestamp(System.currentTimeMillis());
+        datetime.setNanos(0);
+
+        Inventory inventory = new Inventory(0, player.getUniqueId().toString(), player.getName(), LocationUtil.locationToString(player.getLocation()), true, datetime, serializedInventory);
         sqlite.insertInventory(inventory);
 
         playerInventory.clear();
@@ -140,6 +163,23 @@ public class Command_Staff implements CommandExecutor, TabExecutor {
 
     private void restoreInventory(PlayerInventory playerInventory, Player player) {
         Inventory inventory = sqlite.getInventory(player.getUniqueId().toString());
+
+        if (inventory != null) {
+            // Read from config
+            String serializedInventory = inventory.getInventoryContents();
+
+            // Deserialize and restore inventory
+            deserializeAndRestore(playerInventory, player, serializedInventory, 0);
+            inventory.setEnabled(false);
+            sqlite.updateInventory(inventory);
+        } else {
+            player.sendMessage("No saved inventory found.");
+        }
+    }
+
+    private void restoreLostInventory(PlayerInventory playerInventory, Player player, Timestamp datetime) {
+        java.sql.Timestamp date = new java.sql.Timestamp(datetime.getTime());
+        Inventory inventory = sqlite.getInventory(player.getUniqueId().toString(), date);
 
         if (inventory != null) {
             // Read from config
@@ -197,13 +237,15 @@ public class Command_Staff implements CommandExecutor, TabExecutor {
     }
 
     private void appendStaffLog(Player player, String message, boolean enabled) {
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        Log log = new Log(0, player.getUniqueId().toString(), player.getName(), timestamp, enabled, message);
+        Timestamp datetime = new Timestamp(System.currentTimeMillis());
+        datetime.setNanos(0);
+        Log log = new Log(0, player.getUniqueId().toString(), player.getName(), datetime, enabled, message);
         sqlite.insertLog(log);
     }
 
     private void getStaffLog(Player player, String page) {
-        List<Log> logs = sqlite.getLogs(10, Integer.parseInt(page) - 1);
+        int selectedPage = !page.isEmpty() ? Integer.parseInt(page) : 1;
+        List<Log> logs = sqlite.getLogs(10, selectedPage - 1);
 
         // Join logs in string
         StringBuilder logString = new StringBuilder();
@@ -211,10 +253,10 @@ public class Command_Staff implements CommandExecutor, TabExecutor {
             logString
                     .append("\n")
                     .append("&8[&7")
-                    .append(log.getDateCreated())
-                    .append("&8] (")
-                    .append(log.getEnabled() ? "&aEnabled" : "&cDisabled")
-                    .append("&8) &9")
+                    .append(log.getDateCreated()) // to YYYY-MM-DD
+                    .append("&8] ")
+                    .append(log.getEnabled() ? "&a+" : "&c-")
+                    .append("&r &9")
                     .append(log.getUsername())
                     .append("&8: &7")
                     .append(log.getMessage());
@@ -301,6 +343,9 @@ public class Command_Staff implements CommandExecutor, TabExecutor {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] arguments) {
         if (arguments.length == 1) {
+            if (sender.hasPermission("lyttleadmin.staff")) {
+                return Arrays.asList("log", "--restore");
+            }
             return Arrays.asList("log");
         }
 

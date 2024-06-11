@@ -1,5 +1,6 @@
 package com.lyttldev.lyttleadmin.database;
 
+
 import java.sql.Timestamp;
 
 public class Log {
