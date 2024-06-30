@@ -15,7 +15,6 @@ public class SQLite {
             // Create or open the database file
             String path = plugin.getDataFolder().getAbsolutePath() + "/database.db";
             connection = DriverManager.getConnection("jdbc:sqlite:" + path);
-            System.out.println("Connected to SQLite database.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
