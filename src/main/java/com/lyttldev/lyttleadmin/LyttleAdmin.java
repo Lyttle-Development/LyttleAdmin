@@ -1,8 +1,8 @@
 package com.lyttldev.lyttleadmin;
 
-import com.lyttldev.lyttleadmin.commands.Command_Staff;
+import com.lyttldev.lyttleadmin.commands.StaffCommand;
 import com.lyttldev.lyttleadmin.database.SQLite;
-import com.lyttldev.lyttleadmin.handlers.Listener_PlayerJoin;
+import com.lyttldev.lyttleadmin.handlers.PlayerJoinListener;
 import com.lyttldev.lyttleadmin.utils.Console;
 import com.lyttldev.lyttleadmin.utils.Message;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -24,10 +24,10 @@ public final class LyttleAdmin extends JavaPlugin {
         Message.init(this);
 
         // Commands
-        new Command_Staff(this);
+        new StaffCommand(this);
 
         // Listeners
-        new Listener_PlayerJoin(this);
+        new PlayerJoinListener(this);
     }
 
     @Override

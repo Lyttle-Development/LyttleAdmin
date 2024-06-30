@@ -25,12 +25,12 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
-public class Command_Staff implements CommandExecutor, TabExecutor {
+public class StaffCommand implements CommandExecutor, TabExecutor {
     // define plugin
     private final LyttleAdmin plugin;
     private final SQLite sqlite;
 
-    public Command_Staff(LyttleAdmin plugin) {
+    public StaffCommand(LyttleAdmin plugin) {
         plugin.getCommand("staff").setExecutor(this);
         this.plugin = plugin;
         this.sqlite = plugin.sqlite;
@@ -109,7 +109,7 @@ public class Command_Staff implements CommandExecutor, TabExecutor {
     }
 
     public static void onPlayerJoin(Player player) {
-        Command_Staff commandStaff = new Command_Staff(LyttleAdmin.getPlugin(LyttleAdmin.class));
+        StaffCommand commandStaff = new StaffCommand(LyttleAdmin.getPlugin(LyttleAdmin.class));
         boolean staffActive = commandStaff.getStaffActive(player);
         if (staffActive) {
             PlayerInventory playerInventory = player.getInventory();
