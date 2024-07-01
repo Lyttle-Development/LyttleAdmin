@@ -65,10 +65,16 @@ fun latestCommitMessage(): String {
 val versionString: String =  if (System.getenv("CHANNEL") == "Release") {
     version.toString()
 } else {
-    if (System.getenv("GITHUB_RUN_NUMBER") != null) {
-        "${version}-SNAPSHOT+${System.getenv("GITHUB_RUN_NUMBER")}"
+    val versionPrefix = if (System.getenv("CHANNEL") == "Snapshot") {
+        "SNAPSHOT"
     } else {
-        "$version-SNAPSHOT"
+        "ALPHA"
+    }
+
+    if (System.getenv("GITHUB_RUN_NUMBER") != null) {
+        "${version}-${versionPrefix}+${System.getenv("GITHUB_RUN_NUMBER")}"
+    } else {
+        "$version-${versionPrefix}"
     }
 }
 
