@@ -47,12 +47,6 @@ tasks.withType<Javadoc>() {
     options.encoding = "UTF-8"
 }
 
-tasks.named<ProcessResources>("processResources") {
-    filesMatching("plugin.yml") {
-        expand("projectVersion" to project.version)
-    }
-}
-
 // Helper methods
 fun executeGitCommand(vararg command: String): String {
     val byteOut = ByteArrayOutputStream()
@@ -75,6 +69,12 @@ val versionString: String =  if (System.getenv("CHANNEL") == "Release") {
         "${version}-SNAPSHOT+${System.getenv("GITHUB_RUN_NUMBER")}"
     } else {
         "$version-SNAPSHOT"
+    }
+}
+
+tasks.named<ProcessResources>("processResources") {
+    filesMatching("plugin.yml") {
+        expand("projectVersion" to versionString)
     }
 }
 
