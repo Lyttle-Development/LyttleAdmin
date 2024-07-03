@@ -10,6 +10,8 @@ import com.lyttldev.lyttleadmin.utils.Message;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.node.Node;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -19,10 +21,12 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 
 public class StaffCommand implements CommandExecutor, TabExecutor {
@@ -90,6 +94,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             // Save inventory
             saveInventory(playerInventory, player);
             onStaffModeEnabled(player, reason, 0);
+            actionBar(true, player);
         } else {
             Location location = getStaffLocation(player);
             if (location == null) {
@@ -103,9 +108,23 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             // Restore inventory
             restoreInventory(playerInventory, player);
             onStaffModeDisabled(player, reason, false, 0);
+            actionBar(false, player);
         }
 
         return true;
+    }
+
+    HashMap<Player, BukkitTask> activeActionBar = new HashMap<>();
+    private void actionBar(boolean active, Player player) {
+        if (active) {
+            BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+                player.sendActionBar(ChatColor.RED + "STAFF MODE ACTIVE");
+            }, 0, 40);
+            activeActionBar.put(player, task);
+        } else {
+            BukkitTask task = activeActionBar.get(player);
+            task.cancel();
+        }
     }
 
     public static void onPlayerJoin(Player player) {
