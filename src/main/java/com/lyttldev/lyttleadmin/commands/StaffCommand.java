@@ -197,7 +197,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
     }
 
     private void restoreLostInventory(PlayerInventory playerInventory, Player player, Timestamp datetime) {
-        Timestamp date = new Timestamp(datetime.getTime());
+        java.sql.Timestamp date = new java.sql.Timestamp(datetime.getTime());
         Inventory inventory = sqlite.getInventory(player.getUniqueId().toString(), date);
 
         if (inventory != null) {
