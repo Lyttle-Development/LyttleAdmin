@@ -43,7 +43,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("This command can only be run by a player.");
+            Message.sendConsole("must_be_player");
             return true;
         }
 
@@ -52,7 +52,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
         // Check permissions
         if (!sender.hasPermission("lyttleadmin.staff") || (args.length > 0 && args[0].equals("log"))) {
             if (args.length > 0 && args[0].equals("--restore")) {
-                sender.sendMessage("You do not have permission to view staff logs.");
+                Message.sendPlayer(player, "no_permission");
                 return true;
             }
             String page = args.length > 1 ? (args[1] != null ? args[1] : "1") : "1";
@@ -63,7 +63,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
         // Check if the args is --restore
         if (args.length > 0 && args[0].equals("--restore")) {
             if (args.length < 3) {
-                sender.sendMessage("Insufficient arguments. Usage: /staff --restore <date> <time>");
+                Message.sendPlayer(player, "staff_usage");
                 return true;
             }
             try {
@@ -85,7 +85,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
         boolean staffActive = getStaffActive(player);
         if (!staffActive) {
             if (args.length < 1) {
-                Message.sendPlayer(player, "Please specify a staff mode reason.", true);
+                Message.sendPlayer(player, "staff_no_reason");
                 return true;
             }
             // join the args into a string
@@ -98,7 +98,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
         } else {
             Location location = getStaffLocation(player);
             if (location == null) {
-                Message.sendPlayer(player, "No saved location found.", true);
+                Message.sendPlayer(player, "staff_no_location");
             } else {
                 player.teleport(location);
             }
@@ -135,7 +135,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
 
             Location location = commandStaff.getStaffLocation(player);
             if (location == null) {
-                Message.sendPlayer(player, "No saved location found.", true);
+                Message.sendPlayer(player, "staff_no_location");
             } else {
                 player.teleport(location);
             }
@@ -192,7 +192,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             inventory.setEnabled(false);
             sqlite.updateInventory(inventory);
         } else {
-            player.sendMessage("No saved inventory found.");
+            Message.sendPlayer(player, "staff_no_inventory");
         }
     }
 
@@ -209,7 +209,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             inventory.setEnabled(false);
             sqlite.updateInventory(inventory);
         } else {
-            player.sendMessage("No saved inventory found.");
+            Message.sendPlayer(player, "staff_no_inventory");
         }
     }
 
@@ -248,7 +248,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             playerInventory.setContents(inventoryContents);
         } catch (Exception e) {
             if (tries > 10) {
-                player.sendMessage("Failed to restore inventory.");
+                Message.sendPlayer(player, "staff_inventory_restore_failed");
                 return;
             }
             deserializeAndRestore(playerInventory, player, serializedInventory, tries + 1);
@@ -281,7 +281,8 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
                     .append(log.getMessage());
         }
 
-        Message.sendPlayer(player, logString.toString(), true);
+        String logMessage = Message.getMessage("staff_log");
+        Message.sendPlayerRaw(player, logMessage + logString.toString());
     }
 
     private void giveRole(Player player, String role) {
@@ -298,7 +299,11 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
 
     private void onStaffModeEnabled(Player player, String reason, int tries) {
         try {
-            Message.sendChat(player.getName() + " &cenabled&7 staff mode.\n   Reason: &o&9" + reason, true);
+            String[][] messageReplacements = {
+                { "<USER>", player.getName() },
+                { "<REASON>", reason },
+            };
+            Message.sendBroadcast("staff_enabled", messageReplacements, true);
 
             // Check user type
             if (player.hasPermission("lyttleadmin.staff.admin")) {
@@ -308,7 +313,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             }
         } catch (Exception e) {
             if (tries > 10) {
-                player.sendMessage("Failed to enable staff mode.");
+                Message.sendPlayer(player, "staff_enable_failed");
                 return;
             }
 
@@ -330,7 +335,11 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
     private void onStaffModeDisabled(Player player, String reason, boolean doNotAnnounce, int tries) {
         try {
             if (!doNotAnnounce) {
-                Message.sendChat(player.getName() + " &adisabled&7 staff mode.\n   Reason: &9&o" + reason, true);
+                String[][] messageReplacements = {
+                    { "<USER>", player.getName() },
+                    { "<REASON>", reason },
+                };
+                Message.sendBroadcast("staff_disabled", messageReplacements, true);
             }
 
             // Check user type
@@ -341,7 +350,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             }
         } catch (Exception e) {
             if (tries > 10) {
-                player.sendMessage("Failed to disable staff mode.");
+                Message.sendPlayer(player, "staff_disable_failed");
                 return;
             }
             onStaffModeDisabled(player, reason, doNotAnnounce, tries + 1);
