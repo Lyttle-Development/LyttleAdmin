@@ -7,6 +7,7 @@ import com.lyttldev.lyttleadmin.database.SQLite;
 import com.lyttldev.lyttleadmin.utils.Console;
 import com.lyttldev.lyttleadmin.utils.LocationUtil;
 import com.lyttldev.lyttleadmin.utils.Message;
+import net.kyori.adventure.text.Component;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.node.Node;
@@ -43,7 +44,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            Message.sendConsole("must_be_player");
+            Message.sendMessage(sender,"must_be_player");
             return true;
         }
 
@@ -52,7 +53,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
         // Check permissions
         if (!sender.hasPermission("lyttleadmin.staff") || (args.length > 0 && args[0].equals("log"))) {
             if (args.length > 0 && args[0].equals("--restore")) {
-                Message.sendPlayer(player, "no_permission");
+                Message.sendMessage(player, "no_permission");
                 return true;
             }
             String page = args.length > 1 ? (args[1] != null ? args[1] : "1") : "1";
@@ -63,7 +64,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
         // Check if the args is --restore
         if (args.length > 0 && args[0].equals("--restore")) {
             if (args.length < 3) {
-                Message.sendPlayer(player, "staff_usage");
+                Message.sendMessage(player, "staff_usage");
                 return true;
             }
             try {
@@ -85,7 +86,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
         boolean staffActive = getStaffActive(player);
         if (!staffActive) {
             if (args.length < 1) {
-                Message.sendPlayer(player, "staff_no_reason");
+                Message.sendMessage(player, "staff_no_reason");
                 return true;
             }
             // join the args into a string
@@ -98,7 +99,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
         } else {
             Location location = getStaffLocation(player);
             if (location == null) {
-                Message.sendPlayer(player, "staff_no_location");
+                Message.sendMessage(player, "staff_no_location");
             } else {
                 player.teleport(location);
             }
@@ -135,7 +136,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
 
             Location location = commandStaff.getStaffLocation(player);
             if (location == null) {
-                Message.sendPlayer(player, "staff_no_location");
+                Message.sendMessage(player, "staff_no_location");
             } else {
                 player.teleport(location);
             }
@@ -192,7 +193,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             inventory.setEnabled(false);
             sqlite.updateInventory(inventory);
         } else {
-            Message.sendPlayer(player, "staff_no_inventory");
+            Message.sendMessage(player, "staff_no_inventory");
         }
     }
 
@@ -209,7 +210,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             inventory.setEnabled(false);
             sqlite.updateInventory(inventory);
         } else {
-            Message.sendPlayer(player, "staff_no_inventory");
+            Message.sendMessage(player, "staff_no_inventory");
         }
     }
 
@@ -248,7 +249,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             playerInventory.setContents(inventoryContents);
         } catch (Exception e) {
             if (tries > 10) {
-                Message.sendPlayer(player, "staff_inventory_restore_failed");
+                Message.sendMessage(player, "staff_inventory_restore_failed");
                 return;
             }
             deserializeAndRestore(playerInventory, player, serializedInventory, tries + 1);
@@ -281,8 +282,8 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
                     .append(log.getMessage());
         }
 
-        String logMessage = Message.getMessage("staff_log");
-        Message.sendPlayerRaw(player, logMessage + logString.toString());
+        Component logMessage = Message.getMessage("staff_log");
+        Message.sendMessageRaw(player, logMessage + logString.toString());
     }
 
     private void giveRole(Player player, String role) {
@@ -313,7 +314,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             }
         } catch (Exception e) {
             if (tries > 10) {
-                Message.sendPlayer(player, "staff_enable_failed");
+                Message.sendMessage(player, "staff_enable_failed");
                 return;
             }
 
@@ -350,7 +351,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             }
         } catch (Exception e) {
             if (tries > 10) {
-                Message.sendPlayer(player, "staff_disable_failed");
+                Message.sendMessage(player, "staff_disable_failed");
                 return;
             }
             onStaffModeDisabled(player, reason, doNotAnnounce, tries + 1);
