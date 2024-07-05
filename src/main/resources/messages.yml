@@ -1,8 +1,8 @@
-prefix: '&3&lLyttle&b&lEssentials &8- &7'
-no_permission: '&cYou do not have permission to do that!'
-player_not_found: '&4Player not found'
-must_be_player: '&cYou must be a player to use this command!'
-message_not_found: '&cOh... I can''t react to that. (Contact the Administrators)'
+prefix: "<dark_aqua><bold>Lyttle<aqua><bold>Essentials<reset> <dark_gray>- <gray>"
+no_permission: '<dark_red>You do not have permission to do that!'
+player_not_found: '<dark_red>Player not found'
+must_be_player: '<dark_red>You must be a player to use this command!'
+message_not_found: '<dark_red>Oh... I can''t react to that. (Contact the Administrators)'
 
 # Staff messages
 staff_usage: "Insufficient arguments. Usage: /staff --restore <date> <time>"
@@ -10,8 +10,8 @@ staff_no_reason: "You must provide a reason for this action."
 staff_no_location: "No saved location found."
 staff_no_inventory: "No saved inventory found."
 staff_inventory_restore_failed: "Failed to restore inventory."
-staff_enabled: "<USER> &cenabled&7 staff mode.\n   Reason: &o&9<REASON>"
+staff_enabled: "<USER> <dark_red>enabled<gray> staff mode.\n   Reason: <italic><blue><REASON>"
 staff_enable_failed: "Failed to enable staff mode."
-staff_disabled: "<USER> &adisabled&7 staff mode.\n   Reason: &o&9<REASON>"
+staff_disabled: "<USER> <green>disabled<gray> staff mode.\n   Reason: <italic><blue><REASON>"
 staff_disable_failed: "Failed to disable staff mode."
 staff_log: "Staff mode log"

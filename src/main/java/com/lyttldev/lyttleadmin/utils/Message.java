@@ -1,8 +1,11 @@
 package com.lyttldev.lyttleadmin.utils;
 
 import com.lyttldev.lyttleadmin.LyttleAdmin;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nullable;
@@ -44,65 +47,63 @@ public class Message {
         return message;
     }
 
-    public static void sendPlayer(Player player, String message) {
-        String msg = _getConfigMessage(message);
-        player.sendMessage(_getMessage(_getPrefix() + msg));
+    public static void sendMessage(Object target, String message) {
+        Component msg = _getMessage(_getPrefix() + _getConfigMessage(message));
+        _sendMessage(target, msg);
     }
 
-    public static void sendPlayer(Player player, String message, @Nullable String[][] replacements) {
-        String msg = _replaceMessageStrings(_getConfigMessage(message), replacements);
-        player.sendMessage(_getMessage(_getPrefix() + msg));
+    public static void sendMessage(Object target, String message, String[][] replacements) {
+        Component msg = _getMessage(_getPrefix() + _replaceMessageStrings(_getConfigMessage(message), replacements));
+        _sendMessage(target, msg);
     }
 
-    public static void sendPlayerRaw(Player player, String message) {
-        player.sendMessage(_getMessage(_getPrefix() + message));
+    public static void sendMessageRaw(Object target, String message) {
+        Component msg = _getMessage(_getPrefix() + message);
+        _sendMessage(target, msg);
     }
 
-    public static void sendConsole(String message, String[][] replacements) {
-        Console.log(_getMessage(_replaceMessageStrings(_getConfigMessage(message), replacements)));
-    }
-
-    public static void sendConsole(String message) {
-        Console.log(_getConfigMessage(message));
-    }
-
-    public static void sendConsoleRaw(String message) {
-        Console.log(_getMessage(message));
+    private static void _sendMessage(Object target, Component message) {
+        if (target instanceof Player) {
+            ((Player) target).sendMessage(message);
+        }
+        if (target instanceof ConsoleCommandSender) {
+            ((ConsoleCommandSender) target).sendMessage(message);
+        }
     }
 
     public static void sendBroadcast(String message, String[][] replacements) {
         String msg = _replaceMessageStrings(_getConfigMessage(message), replacements);
-        Bukkit.broadcastMessage(_getMessage(msg));
+        Bukkit.broadcast(_getMessage(msg));
     }
 
     public static void sendBroadcast(String message, String[][] replacements, boolean prefix) {
         String msg = _replaceMessageStrings(_getConfigMessage(message), replacements);
         if (prefix) {
-            Bukkit.broadcastMessage(_getMessage(_getPrefix() + msg));
+            Bukkit.broadcast(_getMessage(_getPrefix() + msg));
             return;
         }
-        Bukkit.broadcastMessage(_getMessage(msg));
+        Bukkit.broadcast(_getMessage(msg));
     }
 
     public static void sendBroadcastRaw(String message, boolean prefix) {
         if (prefix) {
-            Bukkit.broadcastMessage(_getMessage(_getPrefix() + message));
+            Bukkit.broadcast(_getMessage(_getPrefix() + message));
             return;
         }
-        Bukkit.broadcastMessage(_getMessage(message));
+        Bukkit.broadcast(_getMessage(message));
     }
 
-    private static String _getMessage(String message) {
+    private static Component _getMessage(String message) {
         // Replace all \n with real newlines
         message = message.replace("\\n", "\n");
-        return ChatColor.translateAlternateColorCodes('&', message + "&r");
+        return MiniMessage.miniMessage().deserialize(message);
     }
 
-    public static String getMessage(String message, String[][] replacements) {
-        return _getMessage(_replaceMessageStrings(_getConfigMessage(message), replacements));
-    }
-
-    public static String getMessage(String message) {
+    public static Component getMessage(String message) {
         return _getMessage(_getConfigMessage(message));
+    }
+
+    public static Component getMessage(String message, String[][] replacements) {
+        return _getMessage(_replaceMessageStrings(_getConfigMessage(message), replacements));
     }
 }
