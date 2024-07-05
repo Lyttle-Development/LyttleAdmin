@@ -1,4 +1,4 @@
-prefix: "<dark_aqua><bold>Lyttle<aqua><bold>Essentials<reset> <dark_gray>- <gray>"
+prefix: "<dark_aqua><bold>Lyttle<aqua><bold>Admin<reset> <dark_gray>- <gray>"
 no_permission: '<dark_red>You do not have permission to do that!'
 player_not_found: '<dark_red>Player not found'
 must_be_player: '<dark_red>You must be a player to use this command!'
