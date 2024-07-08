@@ -93,7 +93,6 @@ tasks.named("build") {
     dependsOn(copyContents)
 }
 
-
 // Helper methods
 fun executeGitCommand(vararg command: String): String {
     val byteOut = ByteArrayOutputStream()
