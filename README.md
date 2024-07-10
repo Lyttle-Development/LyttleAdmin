@@ -14,7 +14,8 @@ LyttleAdmin is a powerful and flexible administration plugin for Minecraft serve
 
 1. Download the latest version of the LyttleAdmin plugin from the [releases page](https://github.com/Lyttle-Development/LyttleAdmin/releases).
 2. Place the downloaded `.jar` file into your server's `plugins` directory.
-3. Restart your server.
+3. Please make sure you do have LuckPerms installed as it is a dependency for LyttleAdmin
+4. Restart your server.
 
 ## Usage
 
