@@ -15,7 +15,7 @@ public class Config {
     private final String pluginFolderPath;
     private final String configPath;
     private YamlConfiguration config = null;
-    private LyttleAdmin plugin;
+    private final LyttleAdmin plugin;
 
     public Config(LyttleAdmin plugin, String configPath) {
         this.pluginFolderPath = plugin.getDataFolder().getPath();
@@ -126,7 +126,7 @@ public class Config {
         YamlConfiguration cfg = this.getConfig();
         // Check if it contains it, but check with all to lower case.
         for (String key : cfg.getKeys(false)) {
-            if (key.toLowerCase().equals(path.toLowerCase())) {
+            if (key.toLowerCase().equalsIgnoreCase(path)) {
                 return true;
             }
         }

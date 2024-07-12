@@ -8,11 +8,11 @@ import com.lyttldev.lyttleadmin.utils.Console;
 import com.lyttldev.lyttleadmin.utils.LocationUtil;
 import com.lyttldev.lyttleadmin.utils.Message;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.node.Node;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -119,7 +119,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
     private void actionBar(boolean active, Player player) {
         if (active) {
             BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-                player.sendActionBar(ChatColor.RED + "STAFF MODE ACTIVE");
+                player.sendActionBar(Component.text("STAFF MODE ACTIVE").color(NamedTextColor.RED));
             }, 0, 40);
             activeActionBar.put(player, task);
         } else {
@@ -375,9 +375,9 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             if (sender.hasPermission("lyttleadmin.staff")) {
                 return Arrays.asList("log", "--restore");
             }
-            return Arrays.asList("log");
+            return List.of("log");
         }
 
-        return Arrays.asList();
+        return List.of();
     }
 }

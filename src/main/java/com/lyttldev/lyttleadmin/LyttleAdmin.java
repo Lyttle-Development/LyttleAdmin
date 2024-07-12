@@ -1,6 +1,6 @@
 package com.lyttldev.lyttleadmin;
 
-import com.lyttldev.lyttleadmin.commands.StaffCommand;
+import com.lyttldev.lyttleadmin.commands.*;
 import com.lyttldev.lyttleadmin.database.SQLite;
 import com.lyttldev.lyttleadmin.handlers.PlayerJoinListener;
 import com.lyttldev.lyttleadmin.types.Configs;
@@ -33,6 +33,7 @@ public final class LyttleAdmin extends JavaPlugin {
 
         // Commands
         new StaffCommand(this);
+        new LyttleAdminCommand(this);
 
         // Listeners
         new PlayerJoinListener(this);
