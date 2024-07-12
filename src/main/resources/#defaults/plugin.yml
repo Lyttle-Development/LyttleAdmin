@@ -7,3 +7,9 @@ commands:
   staff:
     usage: /staff
     description: LyttleAdmin command
+    permission: lyttleadmin.staff
+
+  lyttleadmin:
+    usage: /lyttleadmin [reload]
+    description: Shows plugin version and reload config files
+    permission: lyttleadmin.staff
