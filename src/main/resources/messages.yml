@@ -1,17 +1,67 @@
-prefix: "<dark_aqua><bold>Lyttle<aqua><bold>Admin<reset> <dark_gray>- <gray>"
-no_permission: '<dark_red>You do not have permission to do that!'
-player_not_found: '<dark_red>Player not found'
-must_be_player: '<dark_red>You must be a player to use this command!'
-message_not_found: '<dark_red>Oh... I can''t react to that. (Contact the Administrators)'
+####################################################
+#         Lyttle Admin - messages.yml              #
+####################################################
+# This file contains all messages used in the Lyttle Admin plugin.
+# Supports MiniMessage formatting for styling (<red>, <bold>, <italic>, etc).
+#
+# ⚠️ Do NOT remove any keys. You may change the text, but keys are required.
+####################################################
 
-# Staff messages
+##################################
+# Plugin Message Prefix
+##################################
+
+# Prefix shown before all Lyttle Admin messages
+prefix: "<dark_aqua><bold>Lyttle<aqua><bold>Admin<reset> <dark_gray>- <gray>"
+
+##################################
+# General / Admin Feedback
+##################################
+
+# Sent when a user lacks permission for an action
+no_permission: "<dark_red>You do not have permission to do that!"
+
+# Sent when a target player cannot be found
+player_not_found: "<dark_red>Player not found"
+
+# Sent when a non-player (e.g., console) uses a player-only command
+must_be_player: "<dark_red>You must be a player to use this command!"
+
+# Fallback message for undefined or missing message keys
+message_not_found: "<dark_red>Oh... I can't react to that. (Contact the Administrators)"
+
+##################################
+# Staff Mode & Restore Features
+##################################
+
+# Sent when the /staff command is missing required arguments
 staff_usage: "Insufficient arguments. Usage: /staff --restore <date> <time>"
+
+# Sent when a staff action requires a reason but none is provided
 staff_no_reason: "You must provide a reason for this action."
+
+# Sent when there's no saved teleport location for the player
 staff_no_location: "No saved location found."
+
+# Sent when there's no inventory snapshot available to restore
 staff_no_inventory: "No saved inventory found."
+
+# Sent when the plugin fails to restore a player's inventory
 staff_inventory_restore_failed: "Failed to restore inventory."
+
+# Broadcast when a player enters staff mode
+# Placeholders: <USER> (player name), <REASON> (provided reason)
 staff_enabled: "<USER> <dark_red>enabled<gray> staff mode.\n   Reason: <italic><blue><REASON>"
+
+# Sent when enabling staff mode fails (plugin error or permission issue)
 staff_enable_failed: "Failed to enable staff mode."
+
+# Broadcast when a player exits staff mode
+# Placeholders: <USER> (player name), <REASON> (provided reason)
 staff_disabled: "<USER> <green>disabled<gray> staff mode.\n   Reason: <italic><blue><REASON>"
+
+# Sent when disabling staff mode fails
 staff_disable_failed: "Failed to disable staff mode."
+
+# Header label for internal logging or feedback in UI/logs
 staff_log: "Staff mode log"

@@ -1,0 +1,17 @@
+####################################################
+#              Lyttle Admin - config.yml           #
+####################################################
+# This configuration file holds settings for the Lyttle Admin plugin.
+#
+# ⚠️ WARNING:
+# Do NOT delete or rename keys. While this file is currently minimal,
+# it may be used for additional settings in future versions.
+#
+# Customize values as needed — but double-check syntax before saving.
+####################################################
+
+# NOTE:
+# This configuration file is currently not used.
+# All plugin text and formatting is handled via messages.yml.
+
+# Placeholder for future configuration options.
