@@ -1,7 +1,7 @@
 name: LyttleAdmin
 version: '${projectVersion}'
 main: com.lyttldev.lyttleadmin.LyttleAdmin
-api-version: '1.20'
+api-version: '1.21'
 depend: [LuckPerms]
 commands:
   staff:

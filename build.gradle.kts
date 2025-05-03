@@ -11,17 +11,9 @@ plugins {
 
 repositories {
     mavenLocal()
-    maven {
-        url = uri("https://repo.papermc.io/repository/maven-public/")
-    }
-
-    maven {
-        url = uri("https://oss.sonatype.org/content/groups/public/")
-    }
-
-    maven {
-        url = uri("https://repo.maven.apache.org/maven2/")
-    }
+    maven { url = uri("https://repo.papermc.io/repository/maven-public/") }
+    maven { url = uri("https://oss.sonatype.org/content/groups/public/") }
+    maven { url = uri("https://repo.maven.apache.org/maven2/") }
 }
 
 dependencies {
@@ -75,6 +67,7 @@ val copyContents by tasks.registering(Copy::class) {
     from(sourceFolder) {
         // Exclude the destination folder itself to avoid copying it into itself
         exclude("#defaults/**")
+        exclude("plugin.yml")
     }
     into(destinationFolder)
 
