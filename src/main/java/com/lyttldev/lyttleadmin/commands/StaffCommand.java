@@ -271,15 +271,16 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
         StringBuilder logString = new StringBuilder();
         for (Log log : logs) {
             logString
-                    .append("\n")
-                    .append("&8[&7")
-                    .append(log.getDateCreated()) // to YYYY-MM-DD
-                    .append("&8] ")
-                    .append(log.getEnabled() ? "&a+" : "&c-")
-                    .append("&r &9")
-                    .append(log.getUsername())
-                    .append("&8: &7")
-                    .append(log.getMessage());
+                .append("\n")
+                .append("<gray>[<white>")
+                .append(log.getDateCreated()) // Still in YYYY-MM-DD format
+                .append("<gray>] ")
+                .append(log.getEnabled() ? "<green>+" : "<red>-")
+                .append("<reset> <blue>")
+                .append(log.getUsername())
+                .append("<gray>: <white>")
+                .append(log.getMessage());
+
         }
 
         Component logMessage = Message.getMessage("staff_log");
