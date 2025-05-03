@@ -8,6 +8,7 @@ import com.lyttldev.lyttleadmin.utils.Console;
 import com.lyttldev.lyttleadmin.utils.LocationUtil;
 import com.lyttldev.lyttleadmin.utils.Message;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
@@ -267,25 +268,26 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
         int selectedPage = !page.isEmpty() ? Integer.parseInt(page) : 1;
         List<Log> logs = sqlite.getLogs(10, selectedPage - 1);
 
-        // Join logs in string
-        StringBuilder logString = new StringBuilder();
-        for (Log log : logs) {
-            logString
-                .append("\n")
-                .append("<gray>[<white>")
-                .append(log.getDateCreated()) // Still in YYYY-MM-DD format
-                .append("<gray>] ")
-                .append(log.getEnabled() ? "<green>+" : "<red>-")
-                .append("<reset> <blue>")
-                .append(log.getUsername())
-                .append("<gray>: <white>")
-                .append(log.getMessage());
+        StringBuilder logBuilder = new StringBuilder();
 
+        for (Log log : logs) {
+            logBuilder.append("\n")
+                    .append("<gray>[<white>")
+                    .append(log.getDateCreated())
+                    .append("<gray>] ")
+                    .append(log.getEnabled() ? "<green>+" : "<red>-")
+                    .append(" <blue>")
+                    .append(log.getUsername())
+                    .append("<gray>: <white>")
+                    .append(log.getMessage());
         }
 
-        Component logMessage = Message.getMessage("staff_log");
-        Message.sendMessageRaw(player, logMessage + logString.toString());
+        String header = ((TextComponent) Message.getMessage("staff_log")).content(); // Assuming this returns a MiniMessage string
+        String fullMessage = header + logBuilder;
+
+        Message.sendMessageRaw(player, fullMessage);
     }
+
 
     private void giveRole(Player player, String role) {
         LuckPerms luckPerms = LuckPermsProvider.get();
