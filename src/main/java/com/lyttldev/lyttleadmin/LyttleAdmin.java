@@ -4,8 +4,8 @@ import com.lyttldev.lyttleadmin.commands.*;
 import com.lyttldev.lyttleadmin.database.SQLite;
 import com.lyttldev.lyttleadmin.handlers.PlayerJoinListener;
 import com.lyttldev.lyttleadmin.types.Configs;
-import com.lyttldev.lyttleadmin.utils.Console;
-import com.lyttldev.lyttleadmin.utils.Message;
+import com.lyttledev.lyttleutils.utils.communication.Console;
+import com.lyttledev.lyttleutils.utils.communication.Message;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -29,7 +29,7 @@ public final class LyttleAdmin extends JavaPlugin {
 
         // Plugin startup logic
         Console.init(this);
-        Message.init(this);
+        Message.init(this, config.messages);
 
         // Commands
         new StaffCommand(this);

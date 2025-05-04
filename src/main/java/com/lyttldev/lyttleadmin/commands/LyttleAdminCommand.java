@@ -1,7 +1,7 @@
 package com.lyttldev.lyttleadmin.commands;
 
 import com.lyttldev.lyttleadmin.LyttleAdmin;
-import com.lyttldev.lyttleadmin.utils.Message;
+import com.lyttledev.lyttleutils.utils.communication.Message;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
