@@ -1,8 +1,17 @@
 name: LyttleAdmin
+description: Only get your admin permissions when you need them!
 version: '${projectVersion}'
 main: com.lyttldev.lyttleadmin.LyttleAdmin
 api-version: '1.21'
-depend: [LuckPerms]
+authors:
+  - LyttleDevelopment
+  - ThatsATim
+  - Stualyttle
+
+depend:
+  - LyttleUtils
+  - LuckPerms
+
 commands:
   staff:
     usage: /staff
