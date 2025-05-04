@@ -30,7 +30,7 @@ dependencies {
     api(libs.org.xerial.sqlite.jdbc)
     compileOnly(libs.io.papermc.paper.paper.api)
     compileOnly(libs.net.luckperms.api)
-    implementation("com.lyttledev:lyttleutils:0.0.1-ALPHA.12")
+    implementation("com.lyttledev:lyttleutils:0.0.1-ALPHA.18")
 }
 
 group = "com.lyttldev"

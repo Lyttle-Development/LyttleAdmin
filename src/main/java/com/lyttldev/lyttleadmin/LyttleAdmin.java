@@ -13,6 +13,8 @@ import java.io.File;
 public final class LyttleAdmin extends JavaPlugin {
     public SQLite sqlite;
     public Configs config;
+    public Console console;
+    public Message message;
 
     @Override
     public void onEnable() {
@@ -28,8 +30,8 @@ public final class LyttleAdmin extends JavaPlugin {
         sqlite.createTable();
 
         // Plugin startup logic
-        Console.init(this);
-        Message.init(this, config.messages);
+        this.console = new Console(this);
+        this.message = new Message(this, config.messages);
 
         // Commands
         new StaffCommand(this);
