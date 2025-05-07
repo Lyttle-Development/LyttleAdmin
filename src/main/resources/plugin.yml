@@ -9,7 +9,6 @@ authors:
   - Stualyttle
 
 depend:
-  - LyttleUtils
   - LuckPerms
 
 commands:
