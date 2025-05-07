@@ -10,6 +10,9 @@ jobs:
     # Makes sure the task only runs on pushes to your repository and doesn't fail on forks.
     if: github.repository_owner == 'Lyttle-Development'
     runs-on: ubuntu-22.04
+    env:
+      GPR_USER: ${{ secrets.GPR_USER }}
+      GPR_API_KEY: ${{ secrets.GPR_API_KEY }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

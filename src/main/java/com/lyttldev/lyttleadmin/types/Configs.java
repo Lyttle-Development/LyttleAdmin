@@ -1,6 +1,7 @@
 package com.lyttldev.lyttleadmin.types;
 
 import com.lyttldev.lyttleadmin.LyttleAdmin;
+import com.lyttledev.lyttleutils.types.Config;
 
 public class Configs {
     private final LyttleAdmin plugin;
