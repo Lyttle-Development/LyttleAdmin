@@ -1,7 +1,6 @@
 package com.lyttldev.lyttleadmin.commands;
 
 import com.lyttldev.lyttleadmin.LyttleAdmin;
-import com.lyttldev.lyttleadmin.utils.Message;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -21,7 +20,7 @@ public class LyttleAdminCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         // Check for permission
         if (!(sender.hasPermission("lyttleadmin.lyttleadmin"))) {
-            Message.sendMessage(sender, "no_permission");
+            plugin.message.sendMessage(sender, "no_permission");
             return true;
         }
 
@@ -33,7 +32,7 @@ public class LyttleAdminCommand implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             if (args[0].equalsIgnoreCase("reload")) {
                 plugin.config.reload();
-                Message.sendMessageRaw(sender, "The config has been reloaded");
+                plugin.message.sendMessageRaw(sender, "The config has been reloaded");
             }
         }
         return true;
