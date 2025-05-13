@@ -1,6 +1,6 @@
 <div align="center">
   
-# LyttleAdmin
+# Lyttle Admin
 
 [![Paper](https://img.shields.io/badge/Paper-1.21.x-blue)](https://papermc.io)
 [![Hangar](https://img.shields.io/badge/Hangar-download-success)](https://hangar.papermc.io/Lyttle-Development)
@@ -12,7 +12,7 @@
 
 </div>
 
-![Divider](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+![Divider](https://raw.githubusercontent.com/Lyttle-Development/LyttleUtils/refs/heads/main/line.png)
 
 ## 🌟 Features
 
@@ -129,6 +129,6 @@ If you enjoy this plugin, please consider:
 💬 Sharing it with other server owners<br>
 🎁 Supporting development through [Donations](https://github.com/LyttleDevelopment)
 
-![Divider](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+![Divider](https://raw.githubusercontent.com/Lyttle-Development/LyttleUtils/refs/heads/main/line.png)
 
 </div>
