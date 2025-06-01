@@ -5,9 +5,11 @@ import com.lyttldev.lyttleadmin.database.Inventory;
 import com.lyttldev.lyttleadmin.database.Log;
 import com.lyttldev.lyttleadmin.database.SQLite;
 import com.lyttldev.lyttleadmin.utils.LocationUtil;
+import com.lyttledev.lyttleutils.types.Message.Replacements;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.node.Node;
@@ -283,7 +285,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
         String header = ((TextComponent) plugin.message.getMessage("staff_log")).content(); // Assuming this returns a MiniMessage string
         String fullMessage = header + logBuilder;
 
-        plugin.message.sendMessageRaw(player, fullMessage);
+        plugin.message.sendMessageRaw(player, MiniMessage.miniMessage().deserialize(fullMessage));
     }
 
 
@@ -301,11 +303,12 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
 
     private void onStaffModeEnabled(Player player, String reason, int tries) {
         try {
-            String[][] messageReplacements = {
-                { "<USER>", player.getName() },
-                { "<REASON>", reason },
-            };
-            plugin.message.sendBroadcast("staff_enabled", messageReplacements, true);
+            Replacements replacements = new Replacements.Builder()
+                .add("<USER>", player.getName())
+                .add("<REASON>", reason)
+                .build();
+
+            plugin.message.sendBroadcast("staff_enabled", replacements, true);
 
             // Check user type
             if (player.hasPermission("lyttleadmin.staff.admin")) {
@@ -337,11 +340,12 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
     private void onStaffModeDisabled(Player player, String reason, boolean doNotAnnounce, int tries) {
         try {
             if (!doNotAnnounce) {
-                String[][] messageReplacements = {
-                    { "<USER>", player.getName() },
-                    { "<REASON>", reason },
-                };
-                plugin.message.sendBroadcast("staff_disabled", messageReplacements, true);
+                Replacements replacements = new Replacements.Builder()
+                        .add("<USER>", player.getName())
+                        .add("<REASON>", reason)
+                        .build();
+
+                plugin.message.sendBroadcast("staff_disabled", replacements, true);
             }
 
             // Check user type
