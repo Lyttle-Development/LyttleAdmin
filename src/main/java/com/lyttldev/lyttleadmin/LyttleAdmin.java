@@ -6,6 +6,7 @@ import com.lyttldev.lyttleadmin.handlers.PlayerJoinListener;
 import com.lyttldev.lyttleadmin.types.Configs;
 import com.lyttledev.lyttleutils.utils.communication.Console;
 import com.lyttledev.lyttleutils.utils.communication.Message;
+import com.lyttledev.lyttleutils.utils.storage.GlobalConfig;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -15,12 +16,14 @@ public final class LyttleAdmin extends JavaPlugin {
     public Configs config;
     public Console console;
     public Message message;
+    public GlobalConfig global;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         // Setup config after creating the configs
-        config = new Configs(this);
+        this.config = new Configs(this);
+        this.global = new GlobalConfig(this);
         // Migrate config
         migrateConfig();
 
@@ -31,7 +34,7 @@ public final class LyttleAdmin extends JavaPlugin {
 
         // Plugin startup logic
         this.console = new Console(this);
-        this.message = new Message(this, config.messages);
+        this.message = new Message(this, config.messages, global);
 
         // Commands
         new StaffCommand(this);

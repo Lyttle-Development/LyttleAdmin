@@ -1,41 +1,134 @@
-# LyttleAdmin
+<div align="center">
+  
+# Lyttle Admin
 
-LyttleAdmin is a powerful and flexible administration plugin for Minecraft servers. It provides a wide range of features to help server administrators manage their servers more effectively.
+[![Paper](https://img.shields.io/badge/Paper-1.21.x-blue)](https://papermc.io)
+[![Hangar](https://img.shields.io/badge/Hangar-download-success)](https://hangar.papermc.io/Lyttle-Development)
+[![Discord](https://img.shields.io/discord/941334383216967690?color=7289DA&label=Discord&logo=discord&logoColor=ffffff)](https://discord.gg/QfqFFPFFQZ)
 
-## Features
+> ✨ **A powerful, lightweight staff management plugin with advanced moderation features!** ✨
 
-- **Staff Mode**: Allows staff members to switch into a special mode where they can perform administrative tasks without affecting their normal gameplay. Staff mode can be enabled or disabled with a simple command.
-- **Inventory Management**: Staff members' inventories are saved when they enter staff mode and restored when they exit, preventing any loss of items.
-- **Staff Logs**: All staff mode activations and deactivations are logged, along with the reason provided by the staff member. Logs can be viewed with a simple command.
-- **Role Management**: Staff members are automatically given appropriate permissions when they enter staff mode, and these permissions are removed when they exit.
-- **Location Management**: Staff members' locations are saved when they enter staff mode and they are teleported back to this location when they exit.
+[📚 Features](#--features) • [⌨️ Commands](#-%EF%B8%8F-commands) • [🔑 Permissions](#--permissions) • [📥 Installation](#--installation) • [⚙️ Configuration](#%EF%B8%8F-configuration) • [📱 Support](#--support)
 
-## Dependencies
-- **LuckPerms**: LyttleAdmin requires LuckPerms to manage permissions. You can download LuckPerms from their [website](https://luckperms.net/).
+</div>
 
-## Installation
+![Divider](https://raw.githubusercontent.com/Lyttle-Development/LyttleUtils/refs/heads/main/line.png)
 
-1. Download the latest version of the LyttleAdmin plugin from the [releases page](https://github.com/Lyttle-Development/LyttleAdmin/releases).
-2. Place the downloaded `.jar` file into your server's `plugins` directory.
-3. Please make sure you do have LuckPerms installed as it is a dependency for LyttleAdmin
-4. Restart your server.
+## 🌟 Features
 
-## Usage
+### 🎯 Core Plugin Features
+- Advanced Staff Mode System with reason tracking
+- Inventory and location restoration capabilities
+- Comprehensive staff action logging
+- Player-focused moderation tools
+- MiniMessage format support for all messages
 
-- To enable or disable staff mode, use the `/staff` command. This command can only be used by players (not the console).
-- To view the staff logs, use the `/staff log` command. This command can be used by anyone with the `lyttleadmin.staff` permission.
-- To restore a lost inventory, use the `/staff --restore <date> <time>` command. This command can only be used by players with the `lyttleadmin.staff` permission.
+---
 
-## Permissions
+### 🤌 Lyttle Certified
+- Clean and efficient codebase
+- No unnecessary features
+- Full flexibility and configurability
+- Open source and free to use (MIT License)
 
-- `lyttleadmin.staff`: Allows the user to use the `/staff` command and view the staff logs.
-- `lyttleadmin.staff.admin`: Gives the user admin-level permissions when they enter staff mode.
-- `lyttleadmin.staff.moderator`: Gives the user moderator-level permissions when they enter staff mode.
+---
 
-## Support
+## ⌨️ Commands
 
-If you encounter any issues or have any questions, please [open an issue](https://github.com/Lyttle-Development/LyttleAdmin/issues) on GitHub.
+> 💡 `<required>` `[optional]`
 
-## Contributing
+| Command                        | Permission         | Description                          |
+|:------------------------------|:-------------------|:-------------------------------------|
+| `/staff`                      | `admin.staff`      | Toggle staff mode                    |
+| `/staff --restore <date> <time>` | `admin.restore`    | Restore player data from backup      |
 
-Contributions are welcome! Please read the [contributing guidelines](CONTRIBUTING.md) before getting started.
+---
+
+## 🔑 Permissions
+
+| Permission Node     | Description                   | Default |
+|:-------------------|:------------------------------|:--------|
+| `admin.*`          | Grants all plugin permissions | `❌`     |
+| `admin.staff`      | Access to staff mode          | `❌`     |
+| `admin.restore`    | Access to restore commands    | `❌`     |
+
+---
+
+## 📥 Installation
+
+### Quick Start
+1. Download the latest version from Hangar
+2. Place the `.jar` file in your server's `plugins` folder
+3. Restart your server
+4. Edit the configuration files to customize messages and settings
+5. Use `/staff` to begin using the plugin
+
+---
+
+### 📋 Requirements
+- Java 21 or newer
+- Paper 1.21.x+
+- Minimum 20MB free disk space
+
+---
+
+### 📝 Configuration Files
+#### 🔧 `config.yml`
+The main configuration file controlling plugin behavior and features.
+
+#### 💬 `messages.yml`
+Customize all plugin messages. Supports MiniMessage formatting for advanced styling.
+
+Example message customization:
+```yaml
+prefix: "<dark_aqua><bold>Lyttle<aqua><bold>Admin<reset> <dark_gray>- <gray>"
+staff_enabled: "<USER> <dark_red>enabled<gray> staff mode.\n   Reason: <italic><blue><REASON>"
+```
+
+### 🔄 The #defaults Folder
+The folder serves several important purposes: `#defaults`
+1. **Backup Reference**: Contains original copies of all configuration files
+2. **Reset Option**: Use these to restore default settings
+3. **Update Safety**: Preserved during plugin updates
+4. **Documentation**: Shows all available options with comments
+
+
+> 💡 **Never modify files in the #defaults folder!** They are automatically overwritten during server restarts.
+>
+
+---
+
+## 💬 Support
+
+<div align="center">
+
+### 🤝 Need Help?
+
+[![Discord](https://img.shields.io/discord/941334383216967690?color=7289DA&label=Join%20Our%20Discord&logo=discord&logoColor=ffffff&style=for-the-badge)](https://discord.gg/QfqFFPFFQZ)
+
+🐛 Found a bug? [Open an Issue](https://github.com/your-username/your-plugin/issues)  
+💡 Have a suggestion? [Share your idea](https://github.com/your-username/your-plugin/issues)
+
+</div>
+
+---
+
+## 📜 License
+
+<div align="center">
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+### 🌟 Made with the lyttlest details in mind by [Lyttle Development](https://www.lyttledevelopment.com)
+
+If you enjoy this plugin, please consider:
+
+⭐ Giving it a star on GitHub <br>
+💬 Sharing it with other server owners<br>
+🎁 Supporting development through [Donations](https://github.com/LyttleDevelopment)
+
+![Divider](https://raw.githubusercontent.com/Lyttle-Development/LyttleUtils/refs/heads/main/line.png)
+
+</div>
