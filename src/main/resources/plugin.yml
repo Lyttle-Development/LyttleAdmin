@@ -15,7 +15,6 @@ commands:
   staff:
     usage: /staff
     description: LyttleAdmin command
-    permission: lyttleadmin.staff
 
   lyttleadmin:
     usage: /lyttleadmin [reload]
