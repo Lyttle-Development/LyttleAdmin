@@ -119,7 +119,7 @@ val runNumber: String? = System.getenv("GITHUB_RUN_NUMBER")
 
 val versionString: String = when (envChannel) {
     "Release" -> version.toString()
-    "Beta" -> if (runNumber != null) "${version}-SNAPSHOT+$runNumber" else "${version}-SNAPSHOT"
+    "Beta" -> if (runNumber != null) "${version}-SNAPSHOT.$runNumber" else "${version}-SNAPSHOT"
     else -> if (runNumber != null) "${version}-${envChannel.uppercase()}.$runNumber" else "$version-${envChannel.uppercase()}"
 }
 
