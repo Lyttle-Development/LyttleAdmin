@@ -67,7 +67,7 @@ publishing {
             }
             groupId = project.group.toString()
             artifactId = "lyttleadmin"
-            version = (property("pluginVersion") as String)
+            version = versionString
         }
     }
     repositories {
@@ -144,7 +144,7 @@ val runNumber: String? = System.getenv("GITHUB_RUN_NUMBER")
 val versionString: String = when (envChannel) {
     "Release" -> version.toString()
     "Snapshot" -> if (runNumber != null) "${version}-SNAPSHOT+$runNumber" else "${version}-SNAPSHOT"
-    else -> if (runNumber != null) "${version}-${envChannel.uppercase()}+$runNumber" else "$version-${envChannel.uppercase()}"
+    else -> if (runNumber != null) "${version}-${envChannel.uppercase()}.$runNumber" else "$version-${envChannel.uppercase()}"
 }
 
 // --- Version expansion in plugin.yml ---
