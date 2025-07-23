@@ -31,7 +31,7 @@ dependencies {
     api(libs.org.xerial.sqlite.jdbc)
     compileOnly(libs.io.papermc.paper.paper.api)
     compileOnly(libs.net.luckperms.api)
-    implementation("com.lyttledev:lyttleutils:1.1.1")
+    implementation("com.lyttledev:lyttleutils:1.1.5-BETA.006")
 }
 
 group = "com.lyttledev"
@@ -119,7 +119,7 @@ val runNumber: String? = System.getenv("GITHUB_RUN_NUMBER")
 
 val versionString: String = when (envChannel) {
     "Release" -> version.toString()
-    "Snapshot" -> if (runNumber != null) "${version}-SNAPSHOT+$runNumber" else "${version}-SNAPSHOT"
+    "Beta" -> if (runNumber != null) "${version}-SNAPSHOT.$runNumber" else "${version}-SNAPSHOT"
     else -> if (runNumber != null) "${version}-${envChannel.uppercase()}.$runNumber" else "$version-${envChannel.uppercase()}"
 }
 

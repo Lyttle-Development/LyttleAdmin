@@ -10,8 +10,184 @@
 # Customize values as needed — but double-check syntax before saving.
 ####################################################
 
-# NOTE:
-# This configuration file is currently not used.
-# All plugin text and formatting is handled via messages.yml.
+# roles:
+# This section defines all possible user roles and their permissions/actions.
+# Each role (like 'admin' or 'moderator') can have a name, permission node, and action sets.
+roles:
+##########################################################################################################
+    admin:
+        # name: The display name for the role. Shown in menus, messages, etc.
+        # Example: "Admin"
+        name: "Admin"
 
-# Placeholder for future configuration options.
+        # permission: The permission node required to have this role.
+        # Example: "lyttleadmin.role.admin"
+        # Players must have this permission to use admin features.
+        permission: "lyttleadmin.role.admin"
+
+        # actions: Defines what happens when a player's role status changes.
+        actions:
+          # on_enable: Actions that happen when admin mode is ENABLED for a player.
+          on_enable:
+            # gamemode: Sets the game mode for the player when admin mode is enabled.
+            # Example: gamemode: "CREATIVE", "ADVENTURE", "SURVIVAL" or "SPECTATOR"
+            gamemode: "CREATIVE"
+
+            # broadcast: Sends a message to all players when admin mode is enabled.
+            broadcast:
+              # global: If true, message is sent to EVERYONE online. If false, only to the admin.
+              global: true
+              # If global is disabled, the message is sent only to the players with this permission.
+              permission: "lyttleadmin.broadcast.adminmode"
+              # message: The message to broadcast. <PLAYER> is replaced with the player's name.
+              # Supports Minecraft color codes like <dark_red>, <gray>, <green>.
+              message: "<PLAYER> <dark_red>enabled<gray> admin mode.\n   Reason: <italic><blue><REASON>"
+
+            give:
+
+              # operator: If true, gives the player OP (operator) status when enabling admin mode.
+              # If false, does not change OP status.
+              # Example: operator: true
+              operator: true
+
+              # roles: Adds these role tags/groups to the player when admin mode is enabled.
+              # Example: roles: [ "admin_active" ]
+              roles:
+                - "admin_active"
+
+            remove:
+              # operator: If true, removes OP status from the player. If false, leaves it unchanged.
+              operator: false
+
+              # roles: Removes these role tags/groups from the player when admin mode is enabled.
+              roles:
+                - "admin_inactive"
+                - "admin_suspended"
+
+          # on_disable: Actions that happen when admin mode is DISABLED for a player.
+          on_disable:
+            # gamemode: Sets the game mode for the player when admin mode is disabled.
+            gamemode: "SURVIVAL"
+
+            broadcast:
+              global: true
+              permission: "lyttleadmin.broadcast.adminmode"
+              message: "<PLAYER> <green>disabled<gray> admin mode.\n   Reason: <italic><blue><REASON>"
+
+            give:
+              # operator: If true, gives OP status. Usually false on disable.
+              operator: false
+
+              # roles: Adds these role tags/groups to the player when admin mode is disabled.
+              roles:
+                - "admin_inactive"
+
+            remove:
+              # operator: If true, removes OP status from the player.
+              operator: true
+
+              # roles: Removes these role tags/groups from the player when admin mode is disabled.
+              roles:
+                - "admin_active"
+                - "admin_suspended"
+##########################################################################################################
+    moderator:
+        # name: The display name for the role. Shown in menus, messages, etc.
+        # Example: "Moderator"
+        name: "Moderator"
+
+        # permission: The permission node required to have this role.
+        # Example: "lyttleadmin.role.moderator"
+        # Players must have this permission to use moderator features.
+        permission: "lyttleadmin.role.moderator"
+
+        # actions: Defines what happens when a player's role status changes.
+        actions:
+          # on_enable: Actions that happen when moderator mode is ENABLED for a player.
+          on_enable:
+            # gamemode: Sets the game mode for the player when admin mode is disabled.
+            gamemode: "CREATIVE"
+
+            # broadcast: Sends a message to all players when moderator mode is enabled.
+            broadcast:
+              # global: If true, message is sent to EVERYONE online. If false, only to the moderator.
+              global: true
+              # message: The message to broadcast. <PLAYER> is replaced with the player's name.
+              # Supports Minecraft color codes like <dark_red>, <gray>, <green>.
+              message: "<PLAYER> <dark_red>enabled<gray> moderator mode.\n   Reason: <italic><blue><REASON>"
+
+            give:
+              # operator: If true, gives the player OP (operator) status when enabling moderator mode.
+              # For moderators, this is set to false so they DO NOT get OP.
+              operator: false
+
+              # roles: Adds these role tags/groups to the player when moderator mode is enabled.
+              # Example: roles: [ "admin_active" ]
+              roles:
+                - "admin_active"
+
+            remove:
+              # operator: If true, removes OP status from the player. If false, leaves it unchanged.
+              operator: false
+
+              # roles: Removes these role tags/groups from the player when moderator mode is enabled.
+              roles:
+                - "admin_inactive"
+                - "admin_suspended"
+
+          # on_disable: Actions that happen when moderator mode is DISABLED for a player.
+          on_disable:
+            # gamemode: Sets the game mode for the player when admin mode is disabled.
+            gamemode: "SURVIVAL"
+
+            # broadcast: Sends a message to all players when moderator mode is disabled.
+            broadcast:
+              global: true
+              message: "<PLAYER> <green>disabled<gray> moderator mode.\n   Reason: <italic><blue><REASON>"
+
+            give:
+              # operator: If true, gives OP status. Usually false on disable.
+              operator: false
+
+              # roles: Adds these role tags/groups to the player when moderator mode is disabled.
+              roles:
+                - "admin_inactive"
+
+            remove:
+              # operator: If true, removes OP status from the player.
+              operator: false
+
+              # roles: Removes these role tags/groups from the player when moderator mode is disabled.
+              roles:
+                - "admin_active"
+                - "admin_suspended"
+##########################################################################################################
+# DEFAULT BEHAVIOR:
+#
+# When a player enables admin mode:
+#   - They get OP status (operator: true)
+#   - The "admin_active" role is added to them.
+#   - The "admin_inactive" and "admin_suspended" roles are removed.
+#   - Everyone sees: "<PLAYER> enabled admin mode."
+#
+# When a player disables admin mode:
+#   - They lose OP status (operator: true under remove)
+#   - The "admin_inactive" role is added.
+#   - The "admin_active" and "admin_suspended" roles are removed.
+#   - Everyone sees: "<PLAYER> disabled admin mode."
+#
+# When a player enables moderator mode:
+#   - They DO NOT get OP status (operator: false)
+#   - The "admin_active" role is added to them.
+#   - The "admin_inactive" and "admin_suspended" roles are removed.
+#   - Everyone sees: "<PLAYER> enabled moderator mode."
+#
+# When a player disables moderator mode:
+#   - They DO NOT lose OP status (operator: false under remove)
+#   - The "admin_inactive" role is added.
+#   - The "admin_active" and "admin_suspended" roles are removed.
+#   - Everyone sees: "<PLAYER> disabled moderator mode."
+#
+# TIP: Do not change key names. Only change values (like true/false, role names, messages).
+# If you break the format, the plugin might not work!
+##########################################################################################################
