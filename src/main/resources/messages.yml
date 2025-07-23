@@ -49,16 +49,8 @@ staff_no_inventory: "No saved inventory found."
 # Sent when the plugin fails to restore a player's inventory
 staff_inventory_restore_failed: "Failed to restore inventory."
 
-# Broadcast when a player enters staff mode
-# Placeholders: <USER> (player name), <REASON> (provided reason)
-staff_enabled: "<USER> <dark_red>enabled<gray> staff mode.\n   Reason: <italic><blue><REASON>"
-
 # Sent when enabling staff mode fails (plugin error or permission issue)
 staff_enable_failed: "Failed to enable staff mode."
-
-# Broadcast when a player exits staff mode
-# Placeholders: <USER> (player name), <REASON> (provided reason)
-staff_disabled: "<USER> <green>disabled<gray> staff mode.\n   Reason: <italic><blue><REASON>"
 
 # Sent when disabling staff mode fails
 staff_disable_failed: "Failed to disable staff mode."
@@ -67,3 +59,9 @@ staff_disable_failed: "Failed to disable staff mode."
 staff_log: "Staff mode log"
 
 roles_config_invalid: "Invalid roles configuration. Please check your config.yml file."
+
+roles_not_found: "No roles found. Please define roles in your config.yml file."
+
+role_permission_not_found: "Role permission not found. Please check your config.yml file."
+
+role_actions_not_found: "Role actions not found. Please check your config.yml file."

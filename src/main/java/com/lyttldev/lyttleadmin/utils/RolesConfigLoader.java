@@ -1,39 +1,60 @@
 package com.lyttldev.lyttleadmin.utils;
 
 import com.lyttldev.lyttleadmin.types.*;
+import org.bukkit.configuration.MemorySection;
 
 import java.util.List;
 import java.util.Map;
 
 public class RolesConfigLoader {
-    public static RolesConfig fromYamlObject(Object yamlObj) {
-        if (!(yamlObj instanceof Map)) return null;
-        Map<String, Object> map = (Map<String, Object>) yamlObj;
+    public static RolesConfig fromConfig(Object rolesObj) {
+        if (!(rolesObj instanceof MemorySection)) {
+            System.out.println("[LyttleAdmin] Invalid roles configuration. Please check your config.yml file.");
+            return null;
+        }
+
+        MemorySection rolesSection = (MemorySection) rolesObj;
+        Map<String, Object> rolesMap = rolesSection.getValues(false);
+
         RolesConfig rolesConfig = new RolesConfig();
 
-        // Map<String, RoleConfig>
-        Map<String, RoleConfig> rolesMap = new java.util.HashMap<>();
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
+        for (Map.Entry<String, Object> entry : rolesMap.entrySet()) {
             String roleName = entry.getKey();
-            Object roleObj = entry.getValue();
-            if (roleObj instanceof Map) {
-                rolesMap.put(roleName, RoleConfigLoader.fromMap((Map<String, Object>) roleObj));
+            Object roleSectionObj = entry.getValue();
+            Map<String, Object> roleData = toMap(roleSectionObj);
+            if (roleData != null) {
+                RoleConfig roleConfig = RoleConfigLoader.fromMap(roleData);
+                rolesConfig.addRole(roleName, roleConfig);
+            } else {
+                System.out.println("[LyttleAdmin] Role section for '" + roleName + "' is invalid, skipping.");
             }
         }
-        rolesConfig.setRoles(rolesMap);
+
         return rolesConfig;
+    }
+
+    // Utility to convert MemorySection or Map to Map<String, Object>
+    public static Map<String, Object> toMap(Object obj) {
+        if (obj instanceof MemorySection) {
+            return ((MemorySection) obj).getValues(false);
+        } else if (obj instanceof Map) {
+            return (Map<String, Object>) obj;
+        }
+        return null;
     }
 }
 
-// Similarly, implement RoleConfigLoader.fromMap(Map<String, Object> map), etc.
-// See below for a basic example:
 class RoleConfigLoader {
     public static RoleConfig fromMap(Map<String, Object> map) {
         RoleConfig rc = new RoleConfig();
         rc.setName((String) map.get("name"));
         rc.setPermission((String) map.get("permission"));
-        if (map.containsKey("actions")) {
-            rc.setActions(ActionsConfigLoader.fromMap((Map<String, Object>) map.get("actions")));
+        Object actionsObj = map.get("actions");
+        if (actionsObj != null) {
+            Map<String, Object> actionsMap = RolesConfigLoader.toMap(actionsObj);
+            if (actionsMap != null) {
+                rc.setActions(ActionsConfigLoader.fromMap(actionsMap));
+            }
         }
         return rc;
     }
@@ -42,12 +63,16 @@ class RoleConfigLoader {
 class ActionsConfigLoader {
     public static ActionsConfig fromMap(Map<String, Object> map) {
         ActionsConfig ac = new ActionsConfig();
-        if (map.containsKey("on_enable"))
-            ac.setOn_enable(RoleActionLoader.fromMap((Map<String, Object>) map.get("on_enable")));
-        if (map.containsKey("on_disable"))
-            ac.setOn_disable(RoleActionLoader.fromMap((Map<String, Object>) map.get("on_disable")));
-        if (map.containsKey("gamemode"))
-            ac.setGamemode((String) map.get("gamemode"));
+        Object onEnableObj = map.get("on_enable");
+        if (onEnableObj != null) {
+            Map<String, Object> onEnableMap = RolesConfigLoader.toMap(onEnableObj);
+            if (onEnableMap != null) ac.setOn_enable(RoleActionLoader.fromMap(onEnableMap));
+        }
+        Object onDisableObj = map.get("on_disable");
+        if (onDisableObj != null) {
+            Map<String, Object> onDisableMap = RolesConfigLoader.toMap(onDisableObj);
+            if (onDisableMap != null) ac.setOn_disable(RoleActionLoader.fromMap(onDisableMap));
+        }
         return ac;
     }
 }
@@ -55,10 +80,23 @@ class ActionsConfigLoader {
 class RoleActionLoader {
     public static RoleAction fromMap(Map<String, Object> map) {
         RoleAction ra = new RoleAction();
-        if (map.containsKey("give"))
-            ra.setGive(RoleChangeLoader.fromMap((Map<String, Object>) map.get("give")));
-        if (map.containsKey("remove"))
-            ra.setRemove(RoleChangeLoader.fromMap((Map<String, Object>) map.get("remove")));
+        Object giveObj = map.get("give");
+        if (giveObj != null) {
+            Map<String, Object> giveMap = RolesConfigLoader.toMap(giveObj);
+            if (giveMap != null) ra.setGive(RoleChangeLoader.fromMap(giveMap));
+        }
+        Object removeObj = map.get("remove");
+        if (removeObj != null) {
+            Map<String, Object> removeMap = RolesConfigLoader.toMap(removeObj);
+            if (removeMap != null) ra.setRemove(RoleChangeLoader.fromMap(removeMap));
+        }
+        if (map.containsKey("gamemode"))
+            ra.setGamemode((String) map.get("gamemode"));
+        Object broadcastObj = map.get("broadcast");
+        if (broadcastObj != null) {
+            Map<String, Object> broadcastMap = RolesConfigLoader.toMap(broadcastObj);
+            if (broadcastMap != null) ra.setBroadcast(BroadcastConfigLoader.fromMap(broadcastMap));
+        }
         return ra;
     }
 }
@@ -67,9 +105,10 @@ class RoleChangeLoader {
     public static RoleChange fromMap(Map<String, Object> map) {
         RoleChange rc = new RoleChange();
         rc.setOperator(Boolean.parseBoolean(String.valueOf(map.get("operator"))));
-        rc.setRoles((List<String>) map.get("roles"));
-        if (map.containsKey("broadcast"))
-            rc.setBroadcast(BroadcastConfigLoader.fromMap((Map<String, Object>) map.get("broadcast")));
+        Object rolesObj = map.get("roles");
+        if (rolesObj instanceof List) {
+            rc.setRoles((List<String>) rolesObj);
+        }
         return rc;
     }
 }

@@ -18,16 +18,6 @@ public class ActionsConfig {
         return on_disable;
     }
 
-    public GameMode getGameMode() {
-        return switch (gamemode.toUpperCase()) {
-            case "SURVIVAL" -> GameMode.SURVIVAL;
-            case "CREATIVE" -> GameMode.CREATIVE;
-            case "ADVENTURE" -> GameMode.ADVENTURE;
-            case "SPECTATOR" -> GameMode.SPECTATOR;
-            default -> null;
-        };
-    }
-
     public void setOn_enable(RoleAction on_enable) {
         this.on_enable = on_enable;
     }
@@ -35,6 +25,4 @@ public class ActionsConfig {
     public void setOn_disable(RoleAction on_disable) {
         this.on_disable = on_disable;
     }
-
-    public void setGamemode(String gamemode) { this.gamemode = gamemode; }
 }

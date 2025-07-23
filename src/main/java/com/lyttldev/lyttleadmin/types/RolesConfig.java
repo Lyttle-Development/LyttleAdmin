@@ -1,22 +1,21 @@
 package com.lyttldev.lyttleadmin.types;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Represents the top-level roles object in the config.yml.
- * Example usage: Map<String, RoleConfig> roles;
- */
+// Adjust package if needed!
+
 public class RolesConfig {
-    // Key: role name ("admin", "moderator", etc.), Value: RoleConfig instance
-    private Map<String, RoleConfig> roles;
+    private Map<String, RoleConfig> roles = new HashMap<>();
+
+    public RolesConfig() {}
 
     public Map<String, RoleConfig> getRoles() {
         return roles;
     }
 
-    public void setRoles(Map<String, RoleConfig> roles) {
-        this.roles = roles;
+    public void addRole(String name, RoleConfig config) {
+        if (roles == null) roles = new HashMap<>();
+        roles.put(name, config);
     }
 }
-

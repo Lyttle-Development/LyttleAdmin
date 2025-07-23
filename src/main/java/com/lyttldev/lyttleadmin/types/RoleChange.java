@@ -6,7 +6,6 @@ import java.util.List; /**
 public class RoleChange {
     private boolean operator;
     private List<String> roles;
-    private BroadcastConfig broadcast;
 
     public boolean isOperator() {
         return operator;
@@ -16,19 +15,11 @@ public class RoleChange {
         return roles;
     }
 
-    public BroadcastConfig getBroadcast() {
-        return broadcast;
-    }
-
     public void setOperator(boolean operator) {
         this.operator = operator;
     }
 
     public void setRoles(List<String> roles) {
         this.roles = roles;
-    }
-
-    public void setBroadcast(BroadcastConfig broadcast) {
-        this.broadcast = broadcast;
     }
 }
