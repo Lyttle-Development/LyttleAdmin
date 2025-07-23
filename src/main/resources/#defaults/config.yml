@@ -71,7 +71,7 @@ roles:
 
             broadcast:
               global: true
-              permission: "lyttleadmin.broadcast.moderatormode"
+              permission: "lyttleadmin.broadcast.adminmode"
               message: "<PLAYER> <green>disabled<gray> admin mode.\n   Reason: <italic><blue><REASON>"
 
             give:
