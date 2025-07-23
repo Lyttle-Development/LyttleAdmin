@@ -334,20 +334,21 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             return;
         }
 
-        Map<String, RoleConfig> roles = rolesConfig.getRoles();
-        if (roles == null || roles.isEmpty()) {
+        List<String> permissions = rolesConfig.getPermissions();
+        if (permissions == null || permissions.isEmpty()) {
             plugin.message.sendMessage(player, "roles_not_found");
             return;
         }
 
-        for (RoleConfig role : roles.values()) {
-            String permission = role.getPermission();
+        for (String permission : permissions) {
             if (permission == null || permission.isEmpty()) {
                 plugin.message.sendMessage(player, "role_permission_not_found");
                 continue;
             }
 
             if (!player.hasPermission(permission)) { continue; }
+
+            RoleConfig role = rolesConfig.getRoles().get(permission);
 
             ActionsConfig roleActions = role.getActions();
             if (roleActions == null) {
@@ -436,6 +437,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
                     sendBroadcast(broadcastConfig.getMessage(), replacements, broadcastConfig.isGlobal(), broadcastConfig.getPermission());
                 }
             }
+            break;
         }
     }
 

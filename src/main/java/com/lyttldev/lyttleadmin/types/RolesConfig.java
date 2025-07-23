@@ -1,12 +1,15 @@
 package com.lyttldev.lyttleadmin.types;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 // Adjust package if needed!
 
 public class RolesConfig {
     private Map<String, RoleConfig> roles = new HashMap<>();
+    private final List<String> permissions = new ArrayList<>();
 
     public RolesConfig() {}
 
@@ -14,8 +17,13 @@ public class RolesConfig {
         return roles;
     }
 
+    public List<String> getPermissions() {
+        return permissions;
+    }
+
     public void addRole(String name, RoleConfig config) {
         if (roles == null) roles = new HashMap<>();
-        roles.put(name, config);
+        roles.put(config.getPermission(), config);
+        permissions.add(config.getPermission());
     }
 }
