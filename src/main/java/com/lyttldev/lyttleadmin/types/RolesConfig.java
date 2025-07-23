@@ -21,7 +21,7 @@ public class RolesConfig {
         return permissions;
     }
 
-    public void addRole(String name, RoleConfig config) {
+    public void addRole(RoleConfig config) {
         if (roles == null) roles = new HashMap<>();
         roles.put(config.getPermission(), config);
         permissions.add(config.getPermission());

@@ -24,7 +24,7 @@ public class RolesConfigLoader {
             Map<String, Object> roleData = toMap(roleSectionObj);
             if (roleData != null) {
                 RoleConfig roleConfig = RoleConfigLoader.fromMap(roleData);
-                rolesConfig.addRole(roleName, roleConfig);
+                rolesConfig.addRole(roleConfig);
             } else {
                 System.out.println("[LyttleAdmin] Role section for '" + roleName + "' is invalid, skipping.");
             }
