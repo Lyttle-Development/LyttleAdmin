@@ -11,6 +11,7 @@ public class Configs {
     public Config messages;
 
     // Default configs
+    public Config defaultGeneral;
     public Config defaultMessages;
 
 
@@ -22,6 +23,7 @@ public class Configs {
         messages = new Config(plugin, "messages.yml");
 
         // Default configs
+        defaultGeneral = new Config(plugin, "#defaults/config.yml");
         defaultMessages = new Config(plugin, "#defaults/messages.yml");
     }
 

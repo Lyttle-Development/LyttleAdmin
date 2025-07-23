@@ -65,3 +65,5 @@ staff_disable_failed: "Failed to disable staff mode."
 
 # Header label for internal logging or feedback in UI/logs
 staff_log: "Staff mode log"
+
+roles_config_invalid: "Invalid roles configuration. Please check your config.yml file."

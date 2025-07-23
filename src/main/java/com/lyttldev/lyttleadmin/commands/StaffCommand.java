@@ -4,7 +4,9 @@ import com.lyttldev.lyttleadmin.LyttleAdmin;
 import com.lyttldev.lyttleadmin.database.Inventory;
 import com.lyttldev.lyttleadmin.database.Log;
 import com.lyttldev.lyttleadmin.database.SQLite;
+import com.lyttldev.lyttleadmin.types.*;
 import com.lyttldev.lyttleadmin.utils.LocationUtil;
+import com.lyttldev.lyttleadmin.utils.RolesConfigLoader;
 import com.lyttledev.lyttleutils.types.Message.Replacements;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -30,6 +32,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
 
 public class StaffCommand implements CommandExecutor, TabExecutor {
     // define plugin
@@ -288,19 +291,6 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
         plugin.message.sendMessageRaw(player, MiniMessage.miniMessage().deserialize(fullMessage));
     }
 
-
-    private void giveRole(Player player, String role) {
-        LuckPerms luckPerms = LuckPermsProvider.get();
-        Node node = Node.builder("group." + role).build();
-        luckPerms.getUserManager().modifyUser(player.getUniqueId(), user -> user.data().add(node));
-    }
-
-    private void removeRole(Player player, String role) {
-        LuckPerms luckPerms = LuckPermsProvider.get();
-        Node node = Node.builder("group." + role).build();
-        luckPerms.getUserManager().modifyUser(player.getUniqueId(), user -> user.data().remove(node));
-    }
-
     private void onStaffModeEnabled(Player player, String reason, int tries) {
         try {
             Replacements replacements = new Replacements.Builder()
@@ -310,12 +300,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
 
             plugin.message.sendBroadcast("staff_enabled", replacements, true);
 
-            // Check user type
-            if (player.hasPermission("lyttleadmin.staff.admin")) {
-                onStaffModeEnabledAdmin(player);
-            } else if (player.hasPermission("lyttleadmin.staff.moderator")) {
-                onStaffModeEnabledModerator(player);
-            }
+            runActions(player, true);
         } catch (Exception e) {
             if (tries > 10) {
                 plugin.message.sendMessage(player, "staff_enable_failed");
@@ -324,17 +309,6 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
 
             onStaffModeEnabled(player, reason, tries + 1);
         }
-    }
-
-    private void onStaffModeEnabledAdmin(Player player) {
-        player.setGameMode(GameMode.CREATIVE);
-        giveRole(player, "admin_active");
-        plugin.console.run("op " + player.getName());
-    }
-
-    private void onStaffModeEnabledModerator(Player player) {
-        player.setGameMode(GameMode.CREATIVE);
-        giveRole(player, "mod_active");
     }
 
     private void onStaffModeDisabled(Player player, String reason, boolean doNotAnnounce, int tries) {
@@ -348,12 +322,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
                 plugin.message.sendBroadcast("staff_disabled", replacements, true);
             }
 
-            // Check user type
-            if (player.hasPermission("lyttleadmin.staff.admin")) {
-                onStaffModeDisabledAdmin(player);
-            } else if (player.hasPermission("lyttleadmin.staff.moderator")) {
-                onStaffModeDisabledModerator(player);
-            }
+            runActions(player, false);
         } catch (Exception e) {
             if (tries > 10) {
                 plugin.message.sendMessage(player, "staff_disable_failed");
@@ -363,15 +332,181 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
         }
     }
 
-    private void onStaffModeDisabledAdmin(Player player) {
-        player.setGameMode(GameMode.SURVIVAL);
-        removeRole(player, "admin_active");
-        plugin.console.run("deop " + player.getName());
+    private void runActions(Player player, boolean enable) {
+        Object rolesObj = plugin.config.general.get("roles"); // returns Object
+        // log object in console
+        plugin.console.log("Roles: " + rolesObj);
+
+        RolesConfig rolesConfig = RolesConfigLoader.fromYamlObject(rolesObj); // convert to POJO
+        if (rolesConfig == null) {
+            plugin.message.sendMessage(player, "roles_config_invalid");
+            return;
+        }
+
+        RoleConfig role = rolesConfig.getRoles().get("admin");
+        if (role == null) {
+            plugin.message.sendMessage(player, "role_not_found");
+            return;
+        }
+
+        ActionsConfig roleActions = role.getActions();
+        if (roleActions == null) {
+            plugin.message.sendMessage(player, "role_actions_not_found");
+            return;
+        }
+
+        if (enable) {
+            RoleAction action = roleActions.getOn_enable();
+            RoleChange give = action.getGive();
+            if (give != null) {
+                // Set game mode
+                GameMode gameMode = roleActions.getGameMode();
+                if (gameMode != null) {
+                    setGameMode(player, gameMode);
+                }
+
+                // Set Operator status
+                if (give.isOperator()) {
+                    setOperator(player, true);
+                }
+
+                // Set game mode
+                for (String item : give.getRoles()) {
+                    setRole(player, item, true);
+                }
+
+                // Send broadcast message
+                BroadcastConfig broadcastConfig = give.getBroadcast();
+                if (broadcastConfig != null) {
+                    Replacements replacements = new Replacements.Builder()
+                            .add("<PLAYER>", player.getName())
+                            .build();
+                    sendBroadcast(broadcastConfig.getMessage(), replacements, broadcastConfig.isGlobal(), broadcastConfig.getPermission());
+                }
+            }
+            RoleChange remove = action.getRemove();
+            if (remove != null) {
+                // Set game mode
+                GameMode gameMode = roleActions.getGameMode();
+                if (gameMode != null) {
+                    setGameMode(player, gameMode);
+                }
+
+                // Set Operator status
+                if (remove.isOperator()) {
+                    setOperator(player, false);
+                }
+
+                // Set game mode
+                for (String item : remove.getRoles()) {
+                    setRole(player, item, false);
+                }
+
+                // Send broadcast message
+                BroadcastConfig broadcastConfig = remove.getBroadcast();
+                if (broadcastConfig != null) {
+                    Replacements replacements = new Replacements.Builder()
+                            .add("<PLAYER>", player.getName())
+                            .build();
+                    sendBroadcast(broadcastConfig.getMessage(), replacements, broadcastConfig.isGlobal(), broadcastConfig.getPermission());
+                }
+            }
+        } else {
+            RoleAction action = roleActions.getOn_disable();
+            RoleChange give = action.getGive();
+            if (give != null) {
+                // Set game mode
+                GameMode gameMode = roleActions.getGameMode();
+                if (gameMode != null) {
+                    setGameMode(player, gameMode);
+                }
+
+                // Set Operator status
+                if (give.isOperator()) {
+                    setOperator(player, true);
+                }
+
+                // Set game mode
+                for (String item : give.getRoles()) {
+                    setRole(player, item, true);
+                }
+
+                // Send broadcast message
+                BroadcastConfig broadcastConfig = give.getBroadcast();
+                if (broadcastConfig != null) {
+                    Replacements replacements = new Replacements.Builder()
+                            .add("<PLAYER>", player.getName())
+                            .build();
+                    sendBroadcast(broadcastConfig.getMessage(), replacements, broadcastConfig.isGlobal(), broadcastConfig.getPermission());
+                }
+            }
+            RoleChange remove = action.getRemove();
+            if (remove != null) {
+                // Set game mode
+                GameMode gameMode = roleActions.getGameMode();
+                if (gameMode != null) {
+                    setGameMode(player, gameMode);
+                }
+
+                // Set Operator status
+                if (remove.isOperator()) {
+                    setOperator(player, false);
+                }
+
+                // Set game mode
+                for (String item : remove.getRoles()) {
+                    setRole(player, item, false);
+                }
+
+                // Send broadcast message
+                BroadcastConfig broadcastConfig = remove.getBroadcast();
+                if (broadcastConfig != null) {
+                    Replacements replacements = new Replacements.Builder()
+                            .add("<PLAYER>", player.getName())
+                            .build();
+                    sendBroadcast(broadcastConfig.getMessage(), replacements, broadcastConfig.isGlobal(), broadcastConfig.getPermission());
+                }
+            }
+        }
     }
 
-    private void onStaffModeDisabledModerator(Player player) {
-        player.setGameMode(GameMode.SURVIVAL);
-        removeRole(player, "mod_active");
+    private void setGameMode(Player player, GameMode gameMode) {
+        if (player != null && gameMode != null) {
+            player.setGameMode(gameMode);
+        }
+    }
+
+    private void setOperator(Player player, boolean isOp) {
+        if (player != null) {
+            if (isOp) {
+                plugin.console.run("op " + player.getName());
+            } else {
+                plugin.console.run("deop " + player.getName());
+            }
+        }
+    }
+
+    private void setRole(Player player, String role, boolean add) {
+        LuckPerms luckPerms = LuckPermsProvider.get();
+        Node node = Node.builder("group." + role).build();
+        if (add) {
+            luckPerms.getUserManager().modifyUser(player.getUniqueId(), user -> user.data().add(node));
+        } else {
+            luckPerms.getUserManager().modifyUser(player.getUniqueId(), user -> user.data().remove(node));
+        }
+    }
+
+    private void sendBroadcast(String message, Replacements replacements, boolean global, String permission) {
+        if (global) {
+            plugin.message.sendBroadcast(message, replacements, true);
+        } else {
+            Player[] permissionPlayers = Bukkit.getOnlinePlayers().stream()
+                    .filter(p -> p.hasPermission(permission))
+                    .toArray(Player[]::new);
+            for (Player permissionPlayer : permissionPlayers) {
+                plugin.message.sendMessage(permissionPlayer, message, replacements);
+            }
+        }
     }
 
     @Override
