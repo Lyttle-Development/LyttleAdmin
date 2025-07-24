@@ -101,6 +101,19 @@ public final class LyttleAdmin extends JavaPlugin {
                 // Recheck if the config is fully migrated.
                 migrateConfig();
                 break;
+            case "1":
+                // Migrate config entries.
+                config.general.set("roles", config.defaultGeneral.get("roles"));
+                config.messages.set("roles_config_invalid", config.defaultMessages.get("roles_config_invalid"));
+                config.messages.set("roles_not_found", config.defaultMessages.get("roles_not_found"));
+                config.messages.set("role_permission_not_found", config.defaultMessages.get("role_permission_not_found"));
+                config.messages.set("role_actions_not_found", config.defaultMessages.get("role_actions_not_found"));
+                config.messages.remove("staff_disabled");
+                config.messages.remove("staff_enabled");
+
+                // Update config version.
+                config.general.set("config_version", 2);
+                break;
             default:
                 break;
         }
