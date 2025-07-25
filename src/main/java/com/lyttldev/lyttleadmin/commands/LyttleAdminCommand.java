@@ -26,7 +26,8 @@ public class LyttleAdminCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 0) {
-            sender.sendMessage("plugin version: 1.1.2");
+            Component message = Component.text("plugin version: " + plugin.getDescription().getVersion());
+            plugin.message.sendMessageRaw(sender, message);
             return true;
         }
 
