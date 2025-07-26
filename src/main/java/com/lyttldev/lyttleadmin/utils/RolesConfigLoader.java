@@ -66,12 +66,12 @@ class ActionsConfigLoader {
         Object onEnableObj = map.get("on_enable");
         if (onEnableObj != null) {
             Map<String, Object> onEnableMap = RolesConfigLoader.toMap(onEnableObj);
-            if (onEnableMap != null) ac.setOn_enable(RoleActionLoader.fromMap(onEnableMap));
+            if (onEnableMap != null) ac.setOnEnable(RoleActionLoader.fromMap(onEnableMap));
         }
         Object onDisableObj = map.get("on_disable");
         if (onDisableObj != null) {
             Map<String, Object> onDisableMap = RolesConfigLoader.toMap(onDisableObj);
-            if (onDisableMap != null) ac.setOn_disable(RoleActionLoader.fromMap(onDisableMap));
+            if (onDisableMap != null) ac.setOnDisable(RoleActionLoader.fromMap(onDisableMap));
         }
         return ac;
     }
@@ -92,6 +92,8 @@ class RoleActionLoader {
         }
         if (map.containsKey("gamemode"))
             ra.setGamemode((String) map.get("gamemode"));
+        if (map.containsKey("action_bar"))
+            ra.setActionBar((String) map.get("action_bar"));
         Object broadcastObj = map.get("broadcast");
         if (broadcastObj != null) {
             Map<String, Object> broadcastMap = RolesConfigLoader.toMap(broadcastObj);
