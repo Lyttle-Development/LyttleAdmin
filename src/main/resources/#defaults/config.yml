@@ -13,6 +13,7 @@
 # roles:
 # This section defines all possible user roles and their permissions/actions.
 # Each role (like 'admin' or 'moderator') can have a name, permission node, and action sets.
+# You can add more roles as needed. By default, there are two roles: admin and moderator.
 roles:
 ##########################################################################################################
     admin:
@@ -32,6 +33,9 @@ roles:
             # gamemode: Sets the game mode for the player when admin mode is enabled.
             # Example: gamemode: "CREATIVE", "ADVENTURE", "SURVIVAL" or "SPECTATOR"
             gamemode: "CREATIVE"
+
+            # action_bar: The message shown in the player's action bar when admin mode is enabled.
+            action_bar: "<dark_red>You are now in admin mode.</dark_red>"
 
             # broadcast: Sends a message to all players when admin mode is enabled.
             broadcast:
@@ -105,8 +109,11 @@ roles:
         actions:
           # on_enable: Actions that happen when moderator mode is ENABLED for a player.
           on_enable:
-            # gamemode: Sets the game mode for the player when admin mode is disabled.
+            # gamemode: Sets the game mode for the player when moderator mode is disabled.
             gamemode: "CREATIVE"
+
+            # action_bar: The message shown in the player's action bar when moderator mode is enabled.
+            action_bar: "<dark_red>You are now in moderator mode.</dark_red>"
 
             # broadcast: Sends a message to all players when moderator mode is enabled.
             broadcast:
@@ -122,9 +129,9 @@ roles:
               operator: false
 
               # roles: Adds these role tags/groups to the player when moderator mode is enabled.
-              # Example: roles: [ "admin_active" ]
+              # Example: roles: [ "moderator_active" ]
               roles:
-                - "admin_active"
+                - "moderator_active"
 
             remove:
               # operator: If true, removes OP status from the player. If false, leaves it unchanged.
@@ -132,12 +139,12 @@ roles:
 
               # roles: Removes these role tags/groups from the player when moderator mode is enabled.
               roles:
-                - "admin_inactive"
-                - "admin_suspended"
+                - "moderator_inactive"
+                - "moderator_suspended"
 
           # on_disable: Actions that happen when moderator mode is DISABLED for a player.
           on_disable:
-            # gamemode: Sets the game mode for the player when admin mode is disabled.
+            # gamemode: Sets the game mode for the player when moderator mode is disabled.
             gamemode: "SURVIVAL"
 
             # broadcast: Sends a message to all players when moderator mode is disabled.
@@ -151,7 +158,7 @@ roles:
 
               # roles: Adds these role tags/groups to the player when moderator mode is disabled.
               roles:
-                - "admin_inactive"
+                - "moderator_inactive"
 
             remove:
               # operator: If true, removes OP status from the player.
@@ -159,8 +166,8 @@ roles:
 
               # roles: Removes these role tags/groups from the player when moderator mode is disabled.
               roles:
-                - "admin_active"
-                - "admin_suspended"
+                - "moderator_active"
+                - "moderator_suspended"
 ##########################################################################################################
 # DEFAULT BEHAVIOR:
 #

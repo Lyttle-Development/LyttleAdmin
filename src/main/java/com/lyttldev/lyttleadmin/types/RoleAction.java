@@ -9,6 +9,7 @@ public class RoleAction {
     private RoleChange give;
     private RoleChange remove;
     private String gamemode;
+    private String actionBar;
     private BroadcastConfig broadcast;
 
     public RoleChange getGive() {
@@ -32,6 +33,10 @@ public class RoleAction {
         };
     }
 
+    public String getActionBar() {
+        return actionBar;
+    }
+
     public BroadcastConfig getBroadcast() {
         return broadcast;
     }
@@ -44,7 +49,13 @@ public class RoleAction {
         this.remove = remove;
     }
 
-    public void setGamemode(String gamemode) { this.gamemode = gamemode; }
+    public void setGamemode(String gamemode) {
+        this.gamemode = gamemode;
+    }
+
+    public void setActionBar(String actionBar) {
+        this.actionBar = actionBar;
+    }
 
     public void setBroadcast(BroadcastConfig broadcast) {
         this.broadcast = broadcast;
