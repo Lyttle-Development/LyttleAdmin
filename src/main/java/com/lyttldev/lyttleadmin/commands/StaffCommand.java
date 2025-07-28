@@ -345,7 +345,7 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             if (actionBar != null && !actionBar.isEmpty()) {
                 // Set action bar message
                 Component message = plugin.message.getMessageRaw(actionBar);
-                setActionBar(enable, player, message);
+                setActionBar(true, player, message);
             } else {
                 // If no action bar message is set, clear the action bar
                 setActionBar(false, player, Component.empty());
