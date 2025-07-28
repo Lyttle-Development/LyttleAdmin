@@ -10,7 +10,6 @@ import com.lyttldev.lyttleadmin.utils.RolesConfigLoader;
 import com.lyttledev.lyttleutils.types.Message.Replacements;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
@@ -29,7 +28,6 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.logging.Level;
 
 public class StaffCommand implements CommandExecutor, TabExecutor {
     // define plugin
@@ -97,7 +95,6 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             // Save inventory
             saveInventory(playerInventory, player);
             onStaffModeEnabled(player, reason, 0);
-            actionBar(true, player);
         } else {
             Location location = getStaffLocation(player);
             if (location == null) {
@@ -111,23 +108,9 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             // Restore inventory
             restoreInventory(playerInventory, player);
             onStaffModeDisabled(player, reason, false, 0);
-            actionBar(false, player);
         }
 
         return true;
-    }
-
-    HashMap<Player, BukkitTask> activeActionBar = new HashMap<>();
-    private void actionBar(boolean active, Player player) {
-        if (active) {
-            BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-                player.sendActionBar(Component.text("STAFF MODE ACTIVE").color(NamedTextColor.RED));
-            }, 0, 40);
-            activeActionBar.put(player, task);
-        } else {
-            BukkitTask task = activeActionBar.get(player);
-            task.cancel();
-        }
     }
 
     public static void onPlayerJoin(Player player) {
@@ -356,88 +339,73 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
                 return;
             }
 
-            if (enable) {
-                RoleAction action = roleActions.getOn_enable();
+            RoleAction action = enable ? roleActions.getOnEnable() : roleActions.getOnDisable();
 
-                RoleChange remove = action.getRemove();
-                if (remove != null) {
-                    // Set Operator status
-                    if (remove.isOperator()) {
-                        setOperator(player, false);
-                    }
-
-                    // Set game mode
-                    for (String item : remove.getRoles()) {
-                        setRole(player, item, false);
-                    }
-                }
-
-                RoleChange give = action.getGive();
-                if (give != null) {
-                    // Set Operator status
-                    if (give.isOperator()) {
-                        setOperator(player, true);
-                    }
-
-                    // Set game mode
-                    for (String item : give.getRoles()) {
-                        setRole(player, item, true);
-                    }
-                }
-
-                // Set game mode
-                GameMode gameMode = action.getGameMode();
-                if (gameMode != null) {
-                    setGameMode(player, gameMode);
-                }
-
-                // Send broadcast message
-                BroadcastConfig broadcastConfig = action.getBroadcast();
-                if (broadcastConfig != null) {
-                    sendBroadcast(broadcastConfig.getMessage(), replacements, broadcastConfig.isGlobal(), broadcastConfig.getPermission());
-                }
+            String actionBar = action.getActionBar();
+            if (actionBar != null && !actionBar.isEmpty()) {
+                // Set action bar message
+                Component message = plugin.message.getMessageRaw(actionBar);
+                setActionBar(true, player, message);
             } else {
-                RoleAction action = roleActions.getOn_disable();
+                // If no action bar message is set, clear the action bar
+                setActionBar(false, player, Component.empty());
+            }
 
-                RoleChange remove = action.getRemove();
-                if (remove != null) {
-                    // Set Operator status
-                    if (remove.isOperator()) {
-                        setOperator(player, false);
-                    }
-
-                    // Set game mode
-                    for (String item : remove.getRoles()) {
-                        setRole(player, item, false);
-                    }
-                }
-
-                RoleChange give = action.getGive();
-                if (give != null) {
-                    // Set Operator status
-                    if (give.isOperator()) {
-                        setOperator(player, true);
-                    }
-
-                    // Set game mode
-                    for (String item : give.getRoles()) {
-                        setRole(player, item, true);
-                    }
+            RoleChange remove = action.getRemove();
+            if (remove != null) {
+                // Set Operator status
+                if (remove.isOperator()) {
+                    setOperator(player, false);
                 }
 
                 // Set game mode
-                GameMode gameMode = action.getGameMode();
-                if (gameMode != null) {
-                    setGameMode(player, gameMode);
-                }
-
-                // Send broadcast message
-                BroadcastConfig broadcastConfig = action.getBroadcast();
-                if (broadcastConfig != null) {
-                    sendBroadcast(broadcastConfig.getMessage(), replacements, broadcastConfig.isGlobal(), broadcastConfig.getPermission());
+                for (String item : remove.getRoles()) {
+                    setRole(player, item, false);
                 }
             }
+
+            RoleChange give = action.getGive();
+            if (give != null) {
+                // Set Operator status
+                if (give.isOperator()) {
+                    setOperator(player, true);
+                }
+
+                // Set game mode
+                for (String item : give.getRoles()) {
+                    setRole(player, item, true);
+                }
+            }
+
+            // Set game mode
+            GameMode gameMode = action.getGameMode();
+            if (gameMode != null) {
+                setGameMode(player, gameMode);
+            }
+
+            // Send broadcast message
+            BroadcastConfig broadcastConfig = action.getBroadcast();
+            if (broadcastConfig != null) {
+                sendBroadcast(broadcastConfig.getMessage(), replacements, broadcastConfig.isGlobal(), broadcastConfig.getPermission());
+            }
             break;
+        }
+    }
+
+    HashMap<Player, BukkitTask> activeActionBars = new HashMap<>();
+    private void setActionBar(boolean active, Player player, Component message) {
+        BukkitTask oldActionBarTask = activeActionBars.get(player);
+        // If there is an old action bar task, cancel it before overwriting it
+        if (oldActionBarTask != null) {
+            oldActionBarTask.cancel();
+            activeActionBars.remove(player);
+        }
+
+        if (active) {
+            BukkitTask newActionBarTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+                player.sendActionBar(message);
+            }, 0, 40);
+            activeActionBars.put(player, newActionBarTask);
         }
     }
 
