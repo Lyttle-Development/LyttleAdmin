@@ -8,6 +8,7 @@ import com.lyttldev.lyttleadmin.types.*;
 import com.lyttldev.lyttleadmin.utils.LocationUtil;
 import com.lyttldev.lyttleadmin.utils.RolesConfigLoader;
 import com.lyttledev.lyttleutils.types.Message.Replacements;
+import com.lyttledev.lyttleutils.utils.gameplay.ActionBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -345,10 +346,10 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             if (actionBar != null && !actionBar.isEmpty()) {
                 // Set action bar message
                 Component message = plugin.message.getMessageRaw(actionBar);
-                setActionBar(true, player, message);
+                ActionBar.setActionBar(true, player, message, plugin);
             } else {
                 // If no action bar message is set, clear the action bar
-                setActionBar(false, player, Component.empty());
+                ActionBar.setActionBar(false, player, Component.empty(), plugin);
             }
 
             RoleChange remove = action.getRemove();
@@ -389,23 +390,6 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
                 sendBroadcast(broadcastConfig.getMessage(), replacements, broadcastConfig.isGlobal(), broadcastConfig.getPermission());
             }
             break;
-        }
-    }
-
-    HashMap<Player, BukkitTask> activeActionBars = new HashMap<>();
-    private void setActionBar(boolean active, Player player, Component message) {
-        BukkitTask oldActionBarTask = activeActionBars.get(player);
-        // If there is an old action bar task, cancel it before overwriting it
-        if (oldActionBarTask != null) {
-            oldActionBarTask.cancel();
-            activeActionBars.remove(player);
-        }
-
-        if (active) {
-            BukkitTask newActionBarTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-                player.sendActionBar(message);
-            }, 0, 40);
-            activeActionBars.put(player, newActionBarTask);
         }
     }
 
