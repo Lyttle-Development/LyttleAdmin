@@ -346,10 +346,10 @@ public class StaffCommand implements CommandExecutor, TabExecutor {
             if (actionBar != null && !actionBar.isEmpty()) {
                 // Set action bar message
                 Component message = plugin.message.getMessageRaw(actionBar);
-                ActionBar.setActionBar(true, player, message, plugin);
+                ActionBar.setActionBar(true, player, message);
             } else {
                 // If no action bar message is set, clear the action bar
-                ActionBar.setActionBar(false, player, Component.empty(), plugin);
+                ActionBar.setActionBar(false, player, Component.empty());
             }
 
             RoleChange remove = action.getRemove();

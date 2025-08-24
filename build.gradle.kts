@@ -31,7 +31,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:" + (property("paperVersion") as String) + "-R0.1-SNAPSHOT")
     compileOnly("net.luckperms:api:5.4")
     compileOnly("org.xerial:sqlite-jdbc:3.46.0.0")
-    implementation("com.lyttledev:lyttleutils:1.1.8-BETA.003")
+    implementation("com.lyttledev:lyttleutils:1.2.0")
 }
 
 group = "com.lyttledev"
